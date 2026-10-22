@@ -1,515 +1,730 @@
-
 {% extends "base.html" %}
+{% load tz %}
+
 {% block title %}Audit Dashboard · TrustVault{% endblock %}
 
 {% block content %}
 <style>
-/* FULL HACKER THEME */
-body {
-    background: #020817 !important;
-}
-
-.tv-audit {
-    min-height: 100vh;
-    padding: 28px 20px;
-    color: #e6f2ff;
-    background:
-        radial-gradient(ellipse at top, #0a2040 0%, transparent 55%),
-        linear-gradient(135deg, #020817, #061326, #020817);
-    border-radius: 16px;
-}
-
-.tv-audit * {
-    box-sizing: border-box;
-}
-
-.tv-audit h1,
-.tv-audit h2,
-.tv-audit h3,
-.tv-audit p {
-    color: #e6f2ff;
-}
-
-.tv-eyebrow {
-    color: #00e5ff;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-}
-
-.tv-heading {
-    font-size: clamp(28px, 4vw, 42px);
-    font-weight: 900;
-    margin: 10px 0;
-    text-shadow: 0 0 22px #008cff55;
-}
-
-.tv-subtitle {
-    color: #9bb8d8 !important;
-    margin-bottom: 28px;
-}
-
-.tv-monitor {
-    display: inline-block;
-    padding: 11px 16px;
-    color: #00e5ff;
-    background: #061b30;
-    border: 1px solid #008cff;
-    border-radius: 10px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    box-shadow: 0 0 18px #008cff20;
-}
-
-.tv-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    flex-wrap: wrap;
-    margin-bottom: 28px;
-}
-
-.tv-stats {
-    display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 14px;
-    margin-bottom: 30px;
-}
-
-.tv-stat {
-    min-width: 0;
-    padding: 22px 18px;
-    background: linear-gradient(145deg, #071a31, #030c1b);
-    border: 1px solid #075b91;
-    border-radius: 16px;
-    box-shadow: 0 0 20px #007bff0b;
-    transition: .2s ease;
-}
-
-.tv-stat:hover {
-    transform: translateY(-3px);
-    border-color: #00d9ff;
-    box-shadow: 0 0 22px #008cff20;
-}
-
-.tv-stat-label {
-    color: #8fcaff;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    overflow-wrap: anywhere;
-}
-
-.tv-stat-value {
-    color: #fff;
-    font-size: 34px;
-    font-weight: 900;
-    margin-top: 18px;
-}
-
-.tv-stat-line {
-    width: 48px;
-    height: 3px;
-    margin-top: 16px;
-    border-radius: 10px;
-    background: #00d9ff;
-    box-shadow: 0 0 12px #00d9ff;
-}
-
-.tv-panel {
-    background: rgba(3, 13, 29, .97);
-    border: 1px solid #075b91;
-    border-radius: 16px;
-    overflow: hidden;
-    margin-bottom: 28px;
-    box-shadow: 0 12px 35px #0005, 0 0 20px #007bff0b;
-}
-
-.tv-panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    padding: 20px 24px;
-    background: #06162b;
-    border-bottom: 1px solid #164366;
-}
-
-.tv-panel-head h2 {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 0;
-}
-
-.tv-panel-head span {
-    color: #42c8ff;
-    font-size: 12px;
-}
-
-.tv-filter {
-    display: grid;
-    grid-template-columns: 1.1fr 1.1fr 1.35fr 1.1fr auto;
-    gap: 12px;
-    padding: 20px;
-    background: #030d1d;
-    border-bottom: 1px solid #102e4b;
-}
-
-.tv-audit input,
-.tv-audit select {
-    width: 100%;
-    min-width: 0;
-    min-height: 48px;
-    padding: 11px 13px;
-    color: #e6f2ff !important;
-    background-color: #091a30 !important;
-    border: 1px solid #205077 !important;
-    border-radius: 10px !important;
-    outline: none;
-}
-
-.tv-audit input::placeholder {
-    color: #7797b9;
-}
-
-.tv-audit select option {
-    color: #e6f2ff;
-    background: #091a30;
-}
-
-.tv-audit input:focus,
-.tv-audit select:focus {
-    border-color: #00d9ff !important;
-    box-shadow: 0 0 0 3px #00d9ff17 !important;
-}
-
-.tv-btn {
-    min-height: 46px;
-    padding: 11px 20px;
-    color: #fff !important;
-    background: linear-gradient(135deg, #087cff, #009fe3);
-    border: 1px solid #00d9ff;
-    border-radius: 10px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: .2s ease;
-}
-
-.tv-btn:hover {
-    filter: brightness(1.2);
-    box-shadow: 0 0 18px #008cff55;
-}
-
-.tv-table-wrap {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.tv-table {
-    width: 100%;
-    min-width: 1000px;
-    margin: 0;
-    border-collapse: collapse;
-    color: #d7eaff !important;
-    background: #030b18 !important;
-}
-
-.tv-table thead th {
-    padding: 17px 18px;
-    color: #65c9ff !important;
-    background: #061831 !important;
-    border-bottom: 1px solid #075b91;
-    font-size: 12px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    white-space: nowrap;
-}
-
-.tv-table tbody tr,
-.tv-table tbody td {
-    color: #d7eaff !important;
-    background: #030b18 !important;
-}
-
-.tv-table tbody td {
-    padding: 15px 18px;
-    border-bottom: 1px solid #132a43 !important;
-    vertical-align: middle;
-}
-
-.tv-table tbody tr:hover td {
-    background: #0a1c33 !important;
-}
-
-.tv-table tbody tr:last-child td {
-    border-bottom: 0 !important;
-}
-
-.tv-table .tv-denied td {
-    background: #24101c !important;
-    color: #ffb6c4 !important;
-}
-
-.tv-table .tv-denied:hover td {
-    background: #351324 !important;
-}
-
-.tv-badge {
-    display: inline-block;
-    padding: 5px 9px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 800;
-    border: 1px solid #245477;
-    background: #0b2139;
-    color: #8ed8ff;
-}
-
-.tv-badge-denied {
-    color: #ff9bab;
-    border-color: #76324b;
-    background: #301321;
-}
-
-.tv-badge-success {
-    color: #60e8ad;
-    border-color: #246449;
-    background: #10291f;
-}
-
-.tv-empty {
-    padding: 35px !important;
-    text-align: center;
-    color: #82a3c8 !important;
-}
-
-.tv-empty-icon {
-    display: block;
-    color: #00d9ff;
-    font-size: 30px;
-    margin-bottom: 8px;
-}
-
-.tv-footer-note {
-    color: #7598bd !important;
-    font-size: 12px;
-    margin-top: 12px;
-}
-
-@media (max-width: 1100px) {
-    .tv-stats {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+    :root {
+        --tv-bg: #050b16;
+        --tv-panel: #0b1527;
+        --tv-panel-2: #101e33;
+        --tv-border: #20344e;
+        --tv-text: #eaf4ff;
+        --tv-muted: #91a8c2;
+        --tv-cyan: #19c9ff;
+        --tv-green: #3ee6a8;
+        --tv-red: #ff637d;
+        --tv-yellow: #ffd166;
     }
 
-    .tv-filter {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (max-width: 600px) {
-    .tv-audit {
-        padding: 18px 10px;
+    .audit-page,
+    .audit-page * {
+        box-sizing: border-box;
     }
 
-    .tv-stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .audit-page {
+        width: 100%;
+        min-height: 100vh;
+        padding: 24px;
+        background: var(--tv-bg);
+        color: var(--tv-text);
+        border-radius: 16px;
+        font-family: Inter, "Segoe UI", Arial, sans-serif;
+    }
+
+    .audit-page h1,
+    .audit-page h2,
+    .audit-page h3,
+    .audit-page p {
+        margin-top: 0;
+    }
+
+    .audit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 26px;
+    }
+
+    .audit-eyebrow {
+        color: var(--tv-cyan);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
+
+    .audit-title {
+        font-size: clamp(26px, 4vw, 36px);
+        font-weight: 800;
+        margin-bottom: 8px;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-subtitle {
+        color: var(--tv-muted);
+        font-size: 14px;
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    .audit-clock {
+        min-width: 250px;
+        padding: 18px 20px;
+        background: linear-gradient(145deg, #0d1b30, #081221);
+        border: 1px solid var(--tv-border);
+        border-radius: 14px;
+        box-shadow: 0 0 24px rgba(25, 201, 255, 0.05);
+    }
+
+    .clock-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--tv-muted);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .clock-dot {
+        width: 8px;
+        height: 8px;
+        display: inline-block;
+        background: var(--tv-green);
+        border-radius: 50%;
+        box-shadow: 0 0 10px var(--tv-green);
+        animation: tv-pulse 1.5s infinite;
+    }
+
+    .clock-time {
+        color: var(--tv-cyan);
+        font-size: 27px;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .clock-date {
+        color: var(--tv-text);
+        font-size: 13px;
+        margin-top: 8px;
+        line-height: 1.5;
+    }
+
+    .clock-zone {
+        color: var(--tv-muted);
+        font-size: 11px;
+        margin-top: 6px;
+    }
+
+    @keyframes tv-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+    }
+
+    .audit-panel {
+        padding: 22px;
+        margin-bottom: 22px;
+        background: var(--tv-panel);
+        border: 1px solid var(--tv-border);
+        border-radius: 14px;
+        min-width: 0;
+    }
+
+    .audit-section-title {
+        font-size: 18px;
+        font-weight: 750;
+        margin-bottom: 6px;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-section-description {
+        color: var(--tv-muted);
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 18px;
+    }
+
+    .audit-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+        gap: 15px;
+        margin-bottom: 24px;
+    }
+
+    .audit-stat {
+        min-width: 0;
+        padding: 20px;
+        background: var(--tv-panel);
+        border: 1px solid var(--tv-border);
+        border-radius: 13px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .audit-stat::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: var(--tv-cyan);
+    }
+
+    .audit-stat-label {
+        color: var(--tv-muted);
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-stat-value {
+        color: var(--tv-text);
+        font-size: 30px;
+        font-weight: 850;
+        margin-top: 12px;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-stat:nth-child(2)::before { background: var(--tv-green); }
+    .audit-stat:nth-child(3)::before { background: var(--tv-yellow); }
+    .audit-stat:nth-child(4)::before { background: var(--tv-red); }
+
+    .audit-filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 14px;
+        align-items: end;
+    }
+
+    .audit-field label {
+        display: block;
+        color: var(--tv-muted);
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .audit-page input,
+    .audit-page select {
+        width: 100%;
+        min-width: 0;
+        min-height: 43px;
+        padding: 10px 12px;
+        background: #07101e !important;
+        color: var(--tv-text) !important;
+        border: 1px solid var(--tv-border) !important;
+        border-radius: 8px;
+        outline: none;
+        font: inherit;
+        font-size: 13px;
+        color-scheme: dark;
+    }
+
+    .audit-page input:focus,
+    .audit-page select:focus {
+        border-color: var(--tv-cyan) !important;
+        box-shadow: 0 0 0 2px rgba(25, 201, 255, 0.1);
+    }
+
+    .audit-actions {
+        display: flex;
+        flex-wrap: wrap;
         gap: 10px;
+        margin-top: 16px;
     }
 
-    .tv-stat {
-        padding: 16px 12px;
+    .audit-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        padding: 10px 16px;
+        border: 1px solid var(--tv-cyan);
+        border-radius: 8px;
+        background: var(--tv-cyan);
+        color: #03101b !important;
+        font-size: 13px;
+        font-weight: 800;
+        text-decoration: none !important;
+        cursor: pointer;
+        transition: 0.2s ease;
     }
 
-    .tv-stat-value {
-        font-size: 28px;
+    .audit-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
     }
 
-    .tv-filter {
-        grid-template-columns: 1fr;
-        padding: 14px;
+    .audit-btn-secondary {
+        background: transparent;
+        color: var(--tv-cyan) !important;
     }
 
-    .tv-panel-head {
-        padding: 16px;
+    .audit-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--tv-border);
+        border-radius: 10px;
     }
-}
+
+    .audit-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .audit-table th {
+        padding: 14px 13px;
+        background: var(--tv-panel-2);
+        color: var(--tv-cyan);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        white-space: nowrap;
+    }
+
+    .audit-table td {
+        padding: 14px 13px;
+        border-top: 1px solid var(--tv-border);
+        color: var(--tv-text);
+        font-size: 12px;
+        line-height: 1.6;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-table tbody tr:hover {
+        background: rgba(25, 201, 255, 0.035);
+    }
+
+    .audit-muted {
+        color: var(--tv-muted) !important;
+    }
+
+    .audit-badge {
+        display: inline-block;
+        padding: 5px 8px;
+        border: 1px solid var(--tv-border);
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+    }
+
+    .badge-success {
+        color: var(--tv-green);
+        border-color: rgba(62, 230, 168, 0.3);
+        background: rgba(62, 230, 168, 0.07);
+    }
+
+    .badge-denied,
+    .badge-failure {
+        color: var(--tv-red);
+        border-color: rgba(255, 99, 125, 0.3);
+        background: rgba(255, 99, 125, 0.07);
+    }
+
+    .badge-other {
+        color: var(--tv-yellow);
+        border-color: rgba(255, 209, 102, 0.3);
+        background: rgba(255, 209, 102, 0.07);
+    }
+
+    .audit-empty {
+        padding: 32px 16px !important;
+        text-align: center;
+        color: var(--tv-muted) !important;
+    }
+
+    .audit-bottom-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 22px;
+    }
+
+    .audit-bottom-grid .audit-panel {
+        min-width: 0;
+    }
+
+    .audit-mini-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .audit-mini-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 13px 0;
+        border-bottom: 1px solid var(--tv-border);
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .audit-mini-list li:last-child {
+        border-bottom: 0;
+    }
+
+    .audit-mini-list strong {
+        overflow-wrap: anywhere;
+    }
+
+    .audit-mini-list span {
+        color: var(--tv-muted);
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .audit-footer-note {
+        color: var(--tv-muted);
+        font-size: 11px;
+        line-height: 1.7;
+        margin-top: 16px;
+    }
+
+    @media (max-width: 760px) {
+        .audit-page {
+            padding: 14px;
+        }
+
+        .audit-clock {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .audit-bottom-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .audit-panel {
+            padding: 16px;
+        }
+
+        .audit-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .audit-stat {
+            padding: 15px;
+        }
+
+        .audit-stat-value {
+            font-size: 25px;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .audit-stats {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="tv-audit">
+<div class="audit-page">
 
-    <div class="tv-top">
+    <header class="audit-header">
         <div>
-            <div class="tv-eyebrow">TrustVault / Security Center</div>
-            <h1 class="tv-heading">Audit Dashboard</h1>
-            <p class="tv-subtitle">
-                Monitor activity, security events and document access.
+            <div class="audit-eyebrow">TrustVault / Security Monitoring</div>
+            <h1 class="audit-title">Audit Dashboard</h1>
+            <p class="audit-subtitle">
+                Monitor recorded activity, access decisions and document operations.
             </p>
         </div>
-        <div class="tv-monitor">◈ SECURITY MONITORING</div>
-    </div>
 
-    <!-- Statistics -->
-    <div class="tv-stats">
-        {% for label, v in stats.items %}
-        <div class="tv-stat">
-            <div class="tv-stat-label">{{ label }}</div>
-            <div class="tv-stat-value">{{ v }}</div>
-            <div class="tv-stat-line"></div>
-            {% if label != "users" and label != "documents" %}
-            <small style="color:#7797b9;">Last 7 days</small>
-            {% endif %}
+        <div class="audit-clock" aria-label="Live India date and time">
+            <div class="clock-label">
+                <span class="clock-dot"></span>
+                LIVE SYSTEM CLOCK
+            </div>
+
+            <div id="tv-live-time" class="clock-time">Loading time...</div>
+            <div id="tv-live-date" class="clock-date">Loading date...</div>
+            <div class="clock-zone">India Standard Time · IST (UTC+05:30)</div>
         </div>
+    </header>
+
+    <section class="audit-stats" aria-label="Audit summary">
+        {% for label, value in stats.items %}
+            <div class="audit-stat">
+                <div class="audit-stat-label">{{ label }}</div>
+                <div class="audit-stat-value">{{ value }}</div>
+            </div>
+        {% empty %}
+            <div class="audit-stat">
+                <div class="audit-stat-label">Audit Events</div>
+                <div class="audit-stat-value">{{ events|length }}</div>
+            </div>
         {% endfor %}
-    </div>
+    </section>
 
-    <!-- Audit logs -->
-    <section class="tv-panel">
-        <div class="tv-panel-head">
-            <h2>◈ Security Audit Logs</h2>
-            <span>ACTIVITY MONITOR</span>
-        </div>
+    <section class="audit-panel">
+        <h2 class="audit-section-title">Filter Activity</h2>
+        <p class="audit-section-description">
+            Filter the recorded audit events. The live clock continues updating independently.
+        </p>
 
-        <form method="get" class="tv-filter">
-            <select name="action" aria-label="Filter by action">
-                <option value="">Any action</option>
-                {% for v, l in actions %}
-                <option value="{{ v }}"
-                    {% if v == f.action %}selected{% endif %}>
-                    {{ l }}
-                </option>
-                {% endfor %}
-            </select>
+        <form method="get">
+            <div class="audit-filters">
+                <div class="audit-field">
+                    <label for="audit-action">Action</label>
+                    <select name="action" id="audit-action">
+                        <option value="">All actions</option>
+                        {% for value, label in actions %}
+                            <option value="{{ value }}" {% if request.GET.action == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <select name="outcome" aria-label="Filter by outcome">
-                <option value="">Any outcome</option>
-                {% for v, l in outcomes %}
-                <option value="{{ v }}"
-                    {% if v == f.outcome %}selected{% endif %}>
-                    {{ l }}
-                </option>
-                {% endfor %}
-            </select>
+                <div class="audit-field">
+                    <label for="audit-outcome">Outcome</label>
+                    <select name="outcome" id="audit-outcome">
+                        <option value="">All outcomes</option>
+                        {% for value, label in outcomes %}
+                            <option value="{{ value }}" {% if request.GET.outcome == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            <input
-                name="user"
-                placeholder="Username"
-                value="{{ f.user }}"
-                aria-label="Username">
+                <div class="audit-field">
+                    <label for="audit-search">Search</label>
+                    <input
+                        type="text"
+                        name="f"
+                        id="audit-search"
+                        value="{{ request.GET.f|default:'' }}"
+                        placeholder="User, document or details"
+                    >
+                </div>
+            </div>
 
-            <input
-                name="document"
-                placeholder="Document ID"
-                value="{{ f.document }}"
-                aria-label="Document ID">
-
-            <button type="submit" class="tv-btn">Filter</button>
+            <div class="audit-actions">
+                <button class="audit-btn" type="submit">Apply Filters</button>
+                <a class="audit-btn audit-btn-secondary" href="{% url 'audit_dashboard' %}">
+                    Clear Filters
+                </a>
+            </div>
         </form>
+    </section>
 
-        <div class="tv-table-wrap">
-            <table class="tv-table">
+    <section class="audit-panel">
+        <h2 class="audit-section-title">Activity Log</h2>
+        <p class="audit-section-description">
+            Audit event timestamps are displayed in India Standard Time (IST).
+        </p>
+
+        <div class="audit-table-wrap">
+            <table class="audit-table">
                 <thead>
                     <tr>
-                        <th>Time (UTC)</th>
+                        <th>Time (IST)</th>
                         <th>User</th>
                         <th>Action</th>
                         <th>Outcome</th>
                         <th>Document</th>
-                        <th>Detail</th>
+                        <th>Details</th>
                         <th>IP Address</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    {% for e in events %}
-                    <tr class="{% if e.outcome == 'DENIED' %}tv-denied{% endif %}">
-                        <td>{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
-                        <td>{{ e.actor_username|default:"—" }}</td>
-                        <td>{{ e.action }}</td>
-                        <td>
-                            {% if e.outcome == "DENIED" %}
-                            <span class="tv-badge tv-badge-denied">
-                                {{ e.outcome }}
-                            </span>
-                            {% elif e.outcome == "SUCCESS" %}
-                            <span class="tv-badge tv-badge-success">
-                                {{ e.outcome }}
-                            </span>
-                            {% else %}
-                            <span class="tv-badge">{{ e.outcome }}</span>
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if e.document_id %}
-                                #{{ e.document_id }} {{ e.document_name }}
-                            {% else %}
-                                —
-                            {% endif %}
-                        </td>
-                        <td>{{ e.detail|default:"—" }}</td>
-                        <td>{{ e.ip_address|default:"—" }}</td>
-                    </tr>
+                    {% for event in events %}
+                        <tr>
+                            <td>
+                                {% if event.timestamp %}
+                                    {{ event.timestamp|localtime|date:"d-m-Y h:i:s A" }}
+                                {% else %}
+                                    <span class="audit-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if event.actor_username %}
+                                    {{ event.actor_username }}
+                                {% else %}
+                                    <span class="audit-muted">Unknown user</span>
+                                {% endif %}
+                                <div class="audit-muted">
+                                    ID: {{ event.actor_id|default:"—" }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="audit-badge badge-other">
+                                    {{ event.action|default:"UNKNOWN" }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {% if event.outcome == "SUCCESS" %}
+                                    <span class="audit-badge badge-success">
+                                        {{ event.outcome }}
+                                    </span>
+                                {% elif event.outcome == "DENIED" or event.outcome == "FAILURE" %}
+                                    <span class="audit-badge badge-denied">
+                                        {{ event.outcome }}
+                                    </span>
+                                {% else %}
+                                    <span class="audit-badge badge-other">
+                                        {{ event.outcome|default:"UNKNOWN" }}
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if event.document_name %}
+                                    {{ event.document_name }}
+                                {% elif event.document_id %}
+                                    Document #{{ event.document_id }}
+                                {% else %}
+                                    <span class="audit-muted">—</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ event.detail|default:"—" }}</td>
+                            <td>{{ event.ip_address|default:"—" }}</td>
+                        </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="7" class="tv-empty">
-                            <span class="tv-empty-icon">◇</span>
-                            No audit events found.
-                        </td>
-                    </tr>
+                        <tr>
+                            <td colspan="7" class="audit-empty">
+                                No audit events found for these filters.
+                            </td>
+                        </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
+
+        <p class="audit-footer-note">
+            The live clock shows the current browser time in IST.
+            Audit timestamps show when each event was recorded, converted to IST for display.
+        </p>
     </section>
 
-    <!-- Recent documents -->
-    <section class="tv-panel">
-        <div class="tv-panel-head">
-            <h2>◈ Recent Documents</h2>
-            <span>METADATA ONLY</span>
-        </div>
+    <div class="audit-bottom-grid">
 
-        <div class="tv-table-wrap">
-            <table class="tv-table">
-                <thead>
-                    <tr>
-                        <th>Document ID</th>
-                        <th>Name</th>
-                        <th>Owner</th>
-                        <th>File Size</th>
-                        <th>Uploaded</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for d in documents %}
-                    <tr>
-                        <td>#{{ d.pk }}</td>
-                        <td>{{ d.name }}</td>
-                        <td>{{ d.owner.username }}</td>
-                        <td>{{ d.size|filesizeformat }}</td>
-                        <td>{{ d.uploaded_at|date:"Y-m-d H:i" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="tv-empty">
-                            <span class="tv-empty-icon">◇</span>
-                            No documents found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
+        <section class="audit-panel">
+            <h2 class="audit-section-title">Recent Documents</h2>
+            <p class="audit-section-description">
+                Recently uploaded or updated documents available in this dashboard's context.
+            </p>
 
-    <p class="tv-footer-note">
-        TRUSTVAULT SECURITY SYSTEM · AUDIT RECORDS · ACCESS MONITORING
-    </p>
+            <ul class="audit-mini-list">
+                {% for document in recent_documents %}
+                    <li>
+                        <strong>
+                            {{ document.name|default:document.original_filename|default:"Untitled document" }}
+                        </strong>
+                        <span>
+                            {% if document.uploaded_at %}
+                                {{ document.uploaded_at|localtime|date:"d M Y, h:i A" }}
+                            {% else %}
+                                Document
+                            {% endif %}
+                        </span>
+                    </li>
+                {% empty %}
+                    <li>
+                        <span>No recent documents to display.</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </section>
 
+        <section class="audit-panel">
+            <h2 class="audit-section-title">Monitoring Status</h2>
+            <p class="audit-section-description">
+                Quick information about this dashboard.
+            </p>
+
+            <ul class="audit-mini-list">
+                <li>
+                    <strong>Live clock</strong>
+                    <span>Browser-updated every second</span>
+                </li>
+                <li>
+                    <strong>Displayed timezone</strong>
+                    <span>Asia/Kolkata (IST)</span>
+                </li>
+                <li>
+                    <strong>Audit records</strong>
+                    <span>Loaded when the page is requested</span>
+                </li>
+                <li>
+                    <strong>Activity refresh</strong>
+                    <span>Reload the page to fetch newer events</span>
+                </li>
+            </ul>
+
+            <div class="audit-actions">
+                <button
+                    type="button"
+                    class="audit-btn audit-btn-secondary"
+                    onclick="window.location.reload()"
+                >
+                    Refresh Activity
+                </button>
+            </div>
+        </section>
+
+    </div>
 </div>
+
+<script>
+(function () {
+    "use strict";
+
+    const timeElement = document.getElementById("tv-live-time");
+    const dateElement = document.getElementById("tv-live-date");
+
+    if (!timeElement || !dateElement) {
+        return;
+    }
+
+    const timeFormatter = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+
+    const dateFormatter = new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        weekday: "long",
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    });
+
+    function updateLiveClock() {
+        const now = new Date();
+        timeElement.textContent = timeFormatter.format(now);
+        dateElement.textContent = dateFormatter.format(now);
+    }
+
+    updateLiveClock();
+    window.setInterval(updateLiveClock, 1000);
+})();
+</script>
 {% endblock %}
-```
