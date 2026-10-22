@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TrustVault – UI preview</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--surface:#fff;--text:#1c2430;--muted:#6b7280;--border:#d9dde3;--nav:#212529;--primary:#0d6efd;--danger:#dc3545;--dangerbg:#fde8ea;--ok:#198754;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--surface:#1d2229;--text:#e6e9ee;--muted:#9aa3b0;--border:#333b46;--nav:#0b0d10;--primary:#6ea8fe;--dangerbg:#3a1d21;--ok:#5dd39e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171c;--surface:#1d2229;--text:#e6e9ee;--muted:#9aa3b0;--border:#333b46;--nav:#0b0d10;--primary:#6ea8fe;--dangerbg:#3a1d21;--ok:#5dd39e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.note{background:#fff3cd;color:#664d03;padding:8px 16px;font-size:13px;text-align:center}
+nav{background:var(--nav);color:#fff;display:flex;gap:16px;align-items:center;padding:10px 16px;flex-wrap:wrap}
+nav b{font-size:18px}nav .sp{flex:1}
+nav button.link{background:none;border:0;color:#cbd0d6;cursor:pointer;font:inherit;padding:4px 6px}
+nav button.link.on{color:#fff;text-decoration:underline}
+select.role{background:#343a40;color:#fff;border:1px solid #495057;border-radius:6px;padding:4px 8px}
+main{max-width:1000px;margin:20px auto;padding:0 16px}
+h1{font-size:22px;margin:0 0 14px}h2{font-size:17px;margin:22px 0 8px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);font-size:14px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+th{font-weight:600;color:var(--muted)}
+tr.denied td{background:var(--dangerbg)}
+.btn{display:inline-block;border:1px solid var(--primary);background:var(--primary);color:#fff;padding:6px 14px;border-radius:6px;cursor:pointer;font:inherit;text-decoration:none}
+.btn.o{background:none;color:var(--primary)}.btn.d{background:none;border-color:var(--danger);color:var(--danger)}.btn.s{padding:2px 10px;font-size:13px}
+input,select{background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font:inherit}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:18px}
+.stat{text-align:center;padding:10px}.stat div{font-size:24px;font-weight:600}.stat small{color:var(--muted)}
+dl{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;margin:0 0 14px}dt{color:var(--muted)}dd{margin:0}
+.alert{padding:10px 14px;border-radius:6px;margin-bottom:14px}.alert.ok{background:#d1e7dd;color:#0a3622}.alert.bad{background:var(--dangerbg);color:var(--danger)}
+.muted{color:var(--muted);font-size:13px}
+.login{max-width:380px;margin:30px auto}.login input{width:100%;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="note">Static UI preview with sample data – not the running Django app.</div>
+<nav>
+  <b>TrustVault</b>
+  <span id="links"></span>
+  <span class="sp"></span>
+  <label class="muted" style="color:#cbd0d6">View as
+    <select class="role" id="role"><option value="OWNER">alice · Owner</option><option value="VIEWER">bob · Viewer</option><option value="ADMIN">admin · Admin</option></select>
+  </label>
+</nav>
+<main id="app"></main>
+
+<script>
+const S = { role:'OWNER', view:'docs', shared:true, banner:'' };
+const docs = [
+  {id:1,name:'Q3 Contract – Acme',owner:'alice',cat:'Legal',size:'182 KB',date:'2026-10-14 09:12',file:'acme_contract.pdf'},
+  {id:2,name:'Board minutes',owner:'alice',cat:'Finance',size:'41 KB',date:'2026-10-16 15:40',file:'minutes.txt'},
+  {id:3,name:'Site photo',owner:'carol',cat:'Ops',size:'1.2 MB',date:'2026-10-18 11:05',file:'site.jpg'}
+];
+const events = [
+  ['2026-10-20 08:02:11','bob','DOWNLOAD','SUCCESS','#1 Q3 Contract – Acme','application/pdf','10.0.0.5'],
+  ['2026-10-20 08:03:40','alice','REVOKE','SUCCESS','#1 Q3 Contract – Acme','from bob','10.0.0.2'],
+  ['2026-10-20 08:04:02','bob','DOWNLOAD','DENIED','#1 Q3 Contract – Acme','no access or not found','10.0.0.5'],
+  ['2026-10-20 07:55:31','alice','GRANT','SUCCESS','#1 Q3 Contract – Acme','to bob: read','10.0.0.2'],
+  ['2026-10-19 17:20:09','alice','UPLOAD','SUCCESS','#2 Board minutes','text/plain, 41 KB','10.0.0.2'],
+  ['2026-10-19 16:10:50','','LOGIN','FAILURE','','invalid credentials','203.0.113.9']
+];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const visibleDocs = () => S.role==='OWNER' ? docs.filter(d=>d.owner==='alice')
+  : S.role==='VIEWER' ? (S.shared ? [docs[0]] : []) : [];
+
+function nav(){
+  const items = S.role==='ADMIN' ? [['users','Users'],['audit','Audit dashboard']] : [['docs','Documents']];
+  document.getElementById('links').innerHTML = items.map(([v,l])=>`<button class="link ${S.view===v?'on':''}" data-go="${v}">${l}</button>`).join('');
+}
+const views = {
+  login(){ return `<div class="login card"><h1>Log in</h1><input placeholder="Username"><input type="password" placeholder="Password"><button class="btn" style="width:100%" data-go="docs">Log in</button><p class="muted">Accounts are created by an administrator.</p></div>`; },
+  docs(){
+    const rows = visibleDocs().map(d=>`<tr><td><a href="#" data-go="detail" data-id="${d.id}">${esc(d.name)}</a></td><td>${d.owner}</td><td>${d.cat}</td><td>${d.size}</td><td>${d.date}</td></tr>`).join('')
+      || `<tr><td colspan="5" class="muted">No documents.</td></tr>`;
+    return `${S.banner}<div class="row" style="justify-content:space-between"><h1>Documents</h1>${S.role==='OWNER'?'<button class="btn">Upload</button>':''}</div>
+    <div class="row"><input placeholder="Name"><input placeholder="Owner"><input placeholder="Category"><input type="date"><input type="date"><button class="btn o">Filter</button></div>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Owner</th><th>Category</th><th>Size</th><th>Uploaded</th></tr></thead><tbody>${rows}</tbody></table></div>
+    ${S.role==='VIEWER'?'<p class="muted">Viewers only see documents explicitly shared with them. Use “Owner” view to revoke bob’s access, then switch back.</p>':''}`;
+  },
+  detail(){
+    const d = docs.find(x=>x.id===S.id)||docs[0], own = S.role==='OWNER';
+    return `<h1>${esc(d.name)}</h1><div class="card"><dl><dt>Owner</dt><dd>${d.owner}</dd><dt>Category</dt><dd>${d.cat}</dd><dt>File</dt><dd>${d.file} (${d.size})</dd><dt>Your access</dt><dd>${own?'Owner':'Read'}</dd></dl></div>
+    <p><button class="btn" data-act="download">Download</button> ${own?'<button class="btn o" data-go="share">Manage sharing</button> <button class="btn d">Delete</button>':''}</p>
+    ${S.banner}${own?`<h2>Activity on this document</h2><div class="scroll"><table><tbody>${events.filter(e=>e[4].startsWith('#1')).map(row).join('')}</tbody></table></div>`:''}`;
+  },
+  share(){
+    return `${S.banner}<h1>Sharing: Q3 Contract – Acme</h1><div class="row"><input placeholder="Username"><select><option>Read</option><option>Read + Edit</option></select><button class="btn">Grant</button></div>
+    <div class="scroll"><table><thead><tr><th>User</th><th>Access</th><th>Granted</th><th></th></tr></thead><tbody>${S.shared?`<tr><td>bob</td><td>Read</td><td>2026-10-20 07:55</td><td><button class="btn d s" data-act="revoke">Revoke</button></td></tr>`:`<tr><td colspan="4" class="muted">Not shared with anyone.</td></tr>`}</tbody></table></div>
+    <p class="muted">Revoking blocks the user’s next request. It cannot erase copies they already downloaded.</p><a href="#" data-go="detail" data-id="1">Back</a>`;
+  },
+  users(){
+    return `<h1>Users</h1><div class="scroll"><table><thead><tr><th>Username</th><th>Role</th><th>Active</th><th>Change role</th></tr></thead><tbody>
+    ${[['admin','Admin',1],['alice','Owner'],['bob','Viewer'],['carol','Owner']].map(u=>`<tr><td>${u[0]}</td><td>${u[1]}</td><td>Yes</td><td>${u[2]?'<span class="muted">(you)</span>':`<select><option>${u[1]}</option></select> <button class="btn o s">Save</button>`}</td></tr>`).join('')}</tbody></table></div>`;
+  },
+  audit(){
+    return `<h1>Admin dashboard</h1><div class="stats">${[['Users',4],['Documents',3],['Uploads (7d)',2],['Downloads (7d)',1],['Permission changes (7d)',2],['Denied (7d)',1]].map(([l,v])=>`<div class="card stat"><div>${v}</div><small>${l}</small></div>`).join('')}</div>
+    <div class="row"><select><option>Any action</option></select><select><option>Any outcome</option></select><input placeholder="Username"><input placeholder="Document ID"><button class="btn o">Filter</button></div>
+    <div class="scroll"><table><thead><tr><th>Time (UTC)</th><th>User</th><th>Action</th><th>Outcome</th><th>Document</th><th>Detail</th><th>IP</th></tr></thead><tbody>${events.map(row).join('')}</tbody></table></div>
+    <h2>Recent documents (metadata only)</h2><p class="muted">Admins see names, owners and sizes – never contents.</p>`;
+  }
+};
+function row(e){ return `<tr class="${e[3]==='DENIED'?'denied':''}"><td>${e[0]}</td><td>${e[1]||'—'}</td><td>${e[2]}</td><td>${e[3]}</td><td>${esc(e[4])}</td><td>${esc(e[5])}</td><td>${e[6]}</td></tr>`; }
+
+function render(){
+  nav();
+  document.getElementById('app').innerHTML = views[S.view]();
+  S.banner='';
+}
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-go],[data-act]'); if(!t) return;
+  e.preventDefault();
+  if(t.dataset.go){ S.view=t.dataset.go; if(t.dataset.id) S.id=+t.dataset.id; }
+  if(t.dataset.act==='download') S.banner=`<div class="alert ${S.shared||S.role==='OWNER'?'ok':'bad'}">${S.shared||S.role==='OWNER'?'Download allowed – event written to the audit trail.':'403/404 – denied and audited.'}</div>`;
+  if(t.dataset.act==='revoke'){ S.shared=false; S.banner='<div class="alert ok">Access revoked. Bob’s next request will be denied.</div>'; }
+  render();
+});
+document.getElementById('role').addEventListener('change', e=>{
+  S.role=e.target.value; S.view = S.role==='ADMIN' ? 'audit' : 'docs'; render();
+});
+S.view='login'; render();
+</script>
+</body>
+</html>

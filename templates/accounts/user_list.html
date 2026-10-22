@@ -1,0 +1,545 @@
+ 
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}User Portal · TrustVault{% endblock %}
+
+{% block content %}
+<style>
+html, body {
+    min-height: 100%;
+    background: #020611 !important;
+    color: #e6f4ff !important;
+}
+body {
+    background-image:
+        linear-gradient(rgba(2,6,17,.25), rgba(2,6,17,.35)),
+        url("{% static 'images/trustvault-hacker-bg.png' %}") !important;
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+main, .container, .container-fluid, .content,
+.content-wrapper, .page-content {
+    background: transparent !important;
+}
+.tv-users, .tv-users * { box-sizing: border-box; }
+.tv-users {
+    min-height: 100vh;
+    padding: 28px 20px 60px;
+    color: #e6f4ff !important;
+}
+.tv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+.tv-heading {
+    margin: 0 0 14px;
+    color: #fff !important;
+    font-size: clamp(34px,4vw,52px);
+    line-height: 1.1;
+    font-weight: 900;
+    text-shadow: 0 0 20px rgba(0,145,255,.55);
+}
+.tv-subtitle { margin: 0; color: #a9c9ec !important; }
+.tv-add-btn, .tv-reset-btn {
+    display: inline-block;
+    padding: 12px 15px;
+    border: 1px solid #00e5ff;
+    border-radius: 10px;
+    background: linear-gradient(120deg,#075dff,#00aaca);
+    color: #fff !important;
+    font-weight: 900;
+    text-decoration: none !important;
+    white-space: nowrap;
+}
+.tv-panel {
+    overflow: hidden;
+    border: 1px solid #008fe5;
+    border-radius: 22px;
+    background: rgba(1,8,21,.97) !important;
+    box-shadow: 0 0 28px rgba(0,119,255,.16);
+}
+.tv-panel-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 25px 27px;
+    background: #04132b;
+    border-bottom: 1px solid #123b61;
+}
+.tv-panel-title {
+    margin: 0;
+    color: #f4faff;
+    font-size: 21px;
+    font-weight: 900;
+}
+.tv-count {
+    padding: 10px 14px;
+    border: 1px solid #087bb0;
+    border-radius: 30px;
+    background: #06182b;
+    color: #00e5ff;
+}
+.tv-filter-panel {
+    padding: 22px 27px;
+    border-bottom: 1px solid #123b61;
+    background: #020d20;
+}
+.tv-filter-title {
+    margin: 0 0 15px;
+    color: #c7e7ff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+.tv-filter-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 13px;
+}
+.tv-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 190px;
+    flex: 1;
+}
+.tv-filter-label {
+    color: #8dbbe5;
+    font-size: 12px;
+    font-weight: 800;
+}
+.tv-filter-input, .tv-filter-select {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 13px;
+    border: 1px solid #245079;
+    border-radius: 10px;
+    outline: none;
+    background: #091a31 !important;
+    color: #e6f4ff !important;
+}
+.tv-filter-input::placeholder { color: #7393b5; }
+.tv-filter-input:focus, .tv-filter-select:focus {
+    border-color: #00e5ff;
+    box-shadow: 0 0 0 3px rgba(0,229,255,.10);
+}
+.tv-filter-select option {
+    background: #091a31;
+    color: #e6f4ff;
+}
+.tv-search-btn, .tv-clear-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 18px;
+    border: 1px solid #00bfe9;
+    border-radius: 10px;
+    background: linear-gradient(120deg,#075dff,#007d9b);
+    color: #fff !important;
+    font-weight: 900;
+    text-decoration: none !important;
+    cursor: pointer;
+}
+.tv-clear-btn {
+    border-color: #315577;
+    background: #0a1c32;
+    color: #a9d7ff !important;
+}
+.tv-filter-summary {
+    margin: 15px 0 0;
+    color: #83b6e3;
+    font-size: 13px;
+}
+.tv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    background: #010815;
+}
+.tv-table {
+    width: 100%;
+    min-width: 1450px;
+    border-collapse: collapse;
+    color: #dceeff;
+}
+.tv-table thead th {
+    padding: 17px 14px;
+    background: #041832;
+    color: #83caff;
+    border-bottom: 1px solid #164c78;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    text-align: left;
+}
+.tv-table tbody tr { background: #020a18; }
+.tv-table tbody td {
+    padding: 16px 14px;
+    vertical-align: middle;
+    border-bottom: 1px solid rgba(49,94,133,.38);
+    color: #dceeff;
+}
+.tv-table tbody tr:hover { background: rgba(0,120,255,.10); }
+.tv-user { display: flex; align-items: center; gap: 12px; }
+.tv-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    border: 1px solid #176b9d;
+    border-radius: 14px;
+    background: #092d4c;
+    color: #00e5ff;
+    font-weight: 900;
+}
+.tv-username {
+    color: #f3f9ff;
+    font-weight: 900;
+    overflow-wrap: anywhere;
+}
+.tv-you, .tv-you-label {
+    margin-top: 5px;
+    color: #8db5dd;
+    font-size: 12px;
+}
+.tv-role {
+    display: inline-block;
+    padding: 8px 11px;
+    border: 1px solid #245079;
+    border-radius: 9px;
+    background: #102743;
+    color: #a9d7ff;
+    font-weight: 900;
+}
+.tv-status { font-size: 13px; font-weight: 900; white-space: nowrap; }
+.tv-active { color: #00f0b0 !important; }
+.tv-inactive { color: #ff6687 !important; }
+.tv-role-form, .tv-username-form, .tv-account-actions form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 9px;
+}
+.tv-select, .tv-input {
+    width: 155px;
+    max-width: 100%;
+    min-height: 42px;
+    padding: 9px;
+    border: 1px solid #245079;
+    border-radius: 9px;
+    background: #091a31 !important;
+    color: #e6f4ff !important;
+}
+.tv-input { width: 180px; }
+.tv-select option {
+    background: #091a31;
+    color: #e6f4ff;
+}
+.tv-save, .tv-toggle, .tv-delete {
+    padding: 10px 12px;
+    border: 1px solid #17628c;
+    border-radius: 9px;
+    background: #0a2540;
+    color: #45e5ff;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.tv-save:hover, .tv-toggle:hover { filter: brightness(1.25); }
+.tv-deactivate {
+    border-color: #82344f;
+    background: #53162b;
+    color: #ff91aa;
+}
+.tv-activate {
+    border-color: #16765b;
+    background: #0d4133;
+    color: #48f0b2;
+}
+.tv-delete {
+    border-color: #a52c48;
+    background: #481324;
+    color: #ff8fa7;
+}
+.tv-delete:hover { background: #70172f; }
+.tv-reset-btn {
+    margin-top: 0;
+    border-color: #a65c10;
+    background: #512b0a;
+    color: #ffd08a !important;
+    font-size: 12px;
+}
+.tv-empty {
+    padding: 40px;
+    text-align: center;
+    color: #91b9df;
+}
+.tv-protected { color: #91b9df; font-size: 12px; }
+.tv-warning {
+    margin: 0 0 20px;
+    padding: 13px 16px;
+    border: 1px solid #694b22;
+    border-radius: 10px;
+    background: rgba(57,37,9,.75);
+    color: #ffd08a;
+    font-size: 13px;
+}
+@media (max-width: 700px) {
+    .tv-users { padding: 20px 10px 40px; }
+    .tv-panel-top, .tv-filter-panel { padding: 17px; }
+    .tv-table thead th, .tv-table tbody td { padding: 13px; }
+    .tv-filter-field { min-width: 100%; }
+    .tv-filter-form > button, .tv-filter-form > a { flex: 1; }
+}
+</style>
+
+<div class="tv-users">
+    <header class="tv-header">
+        <div>
+            <h1 class="tv-heading">User Portal</h1>
+            <p class="tv-subtitle">
+                Manage accounts, usernames, roles, passwords and access status.
+            </p>
+        </div>
+        <a class="tv-add-btn" href="{% url 'user_create' %}">
+            + Add New User
+        </a>
+    </header>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div style="margin-bottom:12px;padding:13px 16px;border:1px solid #17628c;border-radius:10px;background:#06182b;color:#e6f4ff;">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="tv-warning">
+        Removing an account deactivates and anonymizes it to preserve document
+        ownership and audit history. This action does not permanently delete
+        the account's related records.
+    </div>
+
+    <section class="tv-panel">
+        <div class="tv-panel-top">
+            <h2 class="tv-panel-title">Registered Users</h2>
+            <span class="tv-count">
+                {{ users|length }} ACCOUNT{{ users|length|pluralize }}
+            </span>
+        </div>
+
+        <div class="tv-filter-panel">
+            <h3 class="tv-filter-title">Search &amp; Filter Users</h3>
+
+            <form method="get" action="{% url 'user_list' %}" class="tv-filter-form">
+                <div class="tv-filter-field">
+                    <label class="tv-filter-label" for="user-search">
+                        Search by Username
+                    </label>
+                    <input
+                        id="user-search"
+                        type="search"
+                        name="q"
+                        class="tv-filter-input"
+                        placeholder="Enter username..."
+                        value="{{ search_query }}"
+                    >
+                </div>
+
+                <div class="tv-filter-field">
+                    <label class="tv-filter-label" for="role-filter">
+                        Filter by Role
+                    </label>
+                    <select id="role-filter" name="role" class="tv-filter-select">
+                        <option value="">All Roles</option>
+                        {% for value, label in roles %}
+                            <option value="{{ value }}" {% if selected_role == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="tv-search-btn">
+                    Search Users
+                </button>
+
+                <a href="{% url 'user_list' %}" class="tv-clear-btn">
+                    Clear Filters
+                </a>
+            </form>
+
+            {% if search_query or selected_role %}
+                <p class="tv-filter-summary">
+                    Showing {{ users|length }} matching account{{ users|length|pluralize }}.
+                    {% if search_query %}
+                        Username contains: "{{ search_query }}"
+                    {% endif %}
+                    {% if selected_role %}
+                        {% for value, label in roles %}
+                            {% if selected_role == value %}
+                                · Role: {{ label }}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </p>
+            {% else %}
+                <p class="tv-filter-summary">
+                    Search usernames or choose a role to narrow the account list.
+                </p>
+            {% endif %}
+        </div>
+
+        <div class="tv-table-wrap">
+            <table class="tv-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Change Username</th>
+                        <th>Change Role</th>
+                        <th>Account Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>
+                            <div class="tv-user">
+                                <div class="tv-avatar">
+                                    {{ u.username|first|upper }}
+                                </div>
+                                <div>
+                                    <div class="tv-username">{{ u.username }}</div>
+                                    {% if u.pk == user.pk %}
+                                        <div class="tv-you">Your account</div>
+                                    {% endif %}
+                                  
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>
+                            <span class="tv-role">{{ u.get_role_display }}</span>
+                        </td>
+
+                        <td>
+                            {% if u.is_active %}
+                                <span class="tv-status tv-active">Active</span>
+                            {% else %}
+                                <span class="tv-status tv-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <form method="post"
+                                  action="{% url 'change_username' u.pk %}"
+                                  class="tv-username-form">
+                                {% csrf_token %}
+                                <input
+                                    type="text"
+                                    name="username"
+                                    class="tv-input"
+                                    value="{{ u.username }}"
+                                    maxlength="150"
+                                    required
+                                    aria-label="New username for {{ u.username }}"
+                                >
+                                <button type="submit" class="tv-save">Save</button>
+                            </form>
+                        </td>
+
+                        <td>
+                            {% if u.pk != user.pk %}
+                                <form method="post"
+                                      action="{% url 'change_role' u.pk %}"
+                                      class="tv-role-form">
+                                    {% csrf_token %}
+                                    <select name="role"
+                                            class="tv-select"
+                                            aria-label="Change role for {{ u.username }}"
+                                            required>
+                                        {% for value, label in roles %}
+                                            <option value="{{ value }}" {% if value == u.role %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="tv-save">Save</button>
+                                </form>
+                            {% else %}
+                                <span class="tv-protected">Current admin</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <div class="tv-account-actions">
+                                {% if u.pk != user.pk %}
+                                    <form method="post" action="{% url 'toggle_active' u.pk %}">
+                                        {% csrf_token %}
+                                        {% if u.is_active %}
+                                            <button type="submit" class="tv-toggle tv-deactivate">
+                                                Deactivate
+                                            </button>
+                                        {% else %}
+                                            <button type="submit" class="tv-toggle tv-activate">
+                                                Activate
+                                            </button>
+                                        {% endif %}
+                                    </form>
+
+                                    <a class="tv-reset-btn"
+                                       href="{% url 'reset_user_password' u.pk %}">
+                                        Reset Password
+                                    </a>
+
+                                    {% if not u.is_superuser %}
+                                        <form method="post"
+                                              action="{% url 'delete_user' u.pk %}"
+                                              onsubmit="return confirm('Remove account {{ u.username|escapejs }}? The account will be deactivated and anonymized. Related documents and audit history will be preserved.');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="tv-delete">
+                                                Remove User
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="tv-protected">Superuser protected</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="tv-protected">
+                                        Your account is protected
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="tv-empty">
+                            No users match your search or selected role.
+                            Try different filters or clear them to see all users.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+{% endblock %}

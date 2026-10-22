@@ -1,0 +1,507 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Documents Portal · TrustVault{% endblock %}
+
+{% block content %}
+
+<style>
+body {
+    background: #020817 !important;
+    color: #e5f4ff !important;
+}
+
+.tv-documents,
+.tv-documents * {
+    box-sizing: border-box;
+}
+
+.tv-documents {
+    --neon: #00d9ff;
+    --border: rgba(0, 190, 255, 0.55);
+
+    width: 100%;
+    min-height: 88vh;
+    padding: 30px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    color: #e5f4ff !important;
+    background:
+        linear-gradient(120deg, rgba(1,7,20,.96), rgba(2,14,36,.94)),
+        url("{% static 'images/trustvault-hacker-bg.png' %}")
+        center center / cover no-repeat;
+    box-shadow: 0 0 25px rgba(0,153,255,.13),
+                inset 0 0 35px rgba(0,120,255,.07);
+}
+
+.tv-documents .tv-muted {
+    color: #8eaccd !important;
+}
+
+.tv-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.tv-eyebrow {
+    color: var(--neon);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.tv-heading {
+    color: #f3f8ff;
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 900;
+    margin: 0 0 10px;
+    text-shadow: 0 0 20px rgba(0,140,255,.35);
+}
+
+.tv-subtitle {
+    color: #9fcfff !important;
+    margin: 0;
+}
+
+.tv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 14px;
+    border: 1px solid #00c9ed;
+    border-radius: 9px;
+    background: rgba(0,136,255,.15);
+    color: #35ddff !important;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.tv-btn:hover {
+    background: #087cff;
+    color: #fff !important;
+}
+
+.tv-upload-btn {
+    padding: 14px 20px;
+    border: 1px solid #00e5ff;
+    border-radius: 12px;
+    background: linear-gradient(135deg,#087cff,#00bddb);
+    color: #fff !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.tv-stats {
+    display: grid;
+    grid-template-columns: repeat(3,minmax(0,1fr));
+    gap: 16px;
+    margin-bottom: 26px;
+}
+
+.tv-stat {
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: rgba(3,14,34,.93);
+}
+
+.tv-stat-label {
+    color: #91bce8 !important;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.tv-stat-value {
+    margin-top: 12px;
+    color: #28ddff !important;
+    font-size: 25px;
+    font-weight: 900;
+    overflow-wrap: anywhere;
+}
+
+.tv-panel {
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 17px;
+    background: rgba(2,10,26,.97);
+}
+
+.tv-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 21px 24px;
+    border-bottom: 1px solid rgba(0,190,255,.35);
+    background: rgba(4,18,40,.96);
+}
+
+.tv-panel-title {
+    margin: 0;
+    color: #f1f7ff !important;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.tv-count,
+.tv-category {
+    display: inline-block;
+    padding: 7px 11px;
+    border: 1px solid #205577;
+    border-radius: 7px;
+    background: rgba(0,175,255,.1);
+    color: #6de8ff !important;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tv-filters {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr auto;
+    gap: 12px;
+    padding: 20px 22px;
+    border-bottom: 1px solid rgba(0,190,255,.3);
+    background: rgba(3,13,31,.96);
+}
+
+.tv-field {
+    width: 100%;
+    min-width: 0;
+    height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #244668;
+    border-radius: 9px;
+    outline: none;
+    background: #091a31 !important;
+    color: #e5f4ff !important;
+    color-scheme: dark;
+}
+
+.tv-field::placeholder {
+    color: #7899bd !important;
+}
+
+.tv-field:focus {
+    border-color: #00d9ff;
+    box-shadow: 0 0 0 3px rgba(0,190,255,.12);
+}
+
+.tv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tv-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: transparent !important;
+    color: #e5f4ff !important;
+}
+
+.tv-table thead th {
+    padding: 16px;
+    border-bottom: 1px solid #244668;
+    background: #0a1b30 !important;
+    color: #8fb8dd !important;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.tv-table td {
+    padding: 16px;
+    border-bottom: 1px solid rgba(44,88,128,.35);
+    background: transparent !important;
+    color: #dcecff !important;
+    vertical-align: middle;
+}
+
+.tv-table tbody tr {
+    background: rgba(3,12,28,.94) !important;
+}
+
+.tv-table tbody tr:hover {
+    background: rgba(0,110,200,.13) !important;
+}
+
+.tv-doc-link {
+    color: #f0f7ff !important;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.tv-doc-link:hover {
+    color: #24dcff !important;
+}
+
+.tv-file-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    margin-right: 8px;
+    border: 1px solid #17618b;
+    border-radius: 9px;
+    background: #0b253c;
+    color: #22dcff;
+}
+
+.tv-empty {
+    padding: 35px 20px !important;
+    text-align: center;
+    color: #8eaccd !important;
+}
+
+.tv-status-pending {
+    color: #ffd166 !important;
+    font-weight: 800;
+}
+
+.tv-status-approved {
+    color: #54f0a5 !important;
+    font-weight: 800;
+}
+
+.tv-status-rejected {
+    color: #ff8585 !important;
+    font-weight: 800;
+}
+
+@media(max-width:1100px) {
+    .tv-filters {
+        grid-template-columns: repeat(3,minmax(0,1fr));
+    }
+}
+
+@media(max-width:768px) {
+    .tv-documents {
+        padding: 18px 12px;
+    }
+    .tv-stats {
+        grid-template-columns: 1fr;
+    }
+    .tv-filters {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="tv-documents">
+
+    {% if user.role == "OWNER" %}
+    <div class="d-flex gap-2 mb-4 flex-wrap">
+        <a href="?scope=my"
+           class="tv-btn">
+            My Documents
+        </a>
+        <a href="?scope=all"
+           class="tv-btn">
+            All Documents
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="tv-hero">
+        <div>
+            <div class="tv-eyebrow">TrustVault / Secure Storage</div>
+            <h1 class="tv-heading">Documents Portal</h1>
+            <p class="tv-subtitle">
+                Browse documents and manage secure download access.
+            </p>
+        </div>
+
+        {% if user.role == "OWNER" or user.role == "ADMIN" %}
+        <a class="tv-upload-btn" href="{% url 'document_upload' %}">
+            + Upload Document
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="tv-stats">
+        <div class="tv-stat">
+            <div class="tv-stat-label">Documents Listed</div>
+            <div class="tv-stat-value">{{ documents|length }}</div>
+        </div>
+        <div class="tv-stat">
+            <div class="tv-stat-label">Portal Status</div>
+            <div class="tv-stat-value">SECURE</div>
+        </div>
+        <div class="tv-stat">
+            <div class="tv-stat-label">Current User</div>
+            <div class="tv-stat-value">{{ user.username }}</div>
+        </div>
+    </div>
+
+    <section class="tv-panel">
+        <div class="tv-panel-header">
+            <h2 class="tv-panel-title">◇ Document Repository</h2>
+            <span class="tv-count">
+                {{ documents|length }} FILE{{ documents|length|pluralize }}
+            </span>
+        </div>
+
+        <form method="get" class="tv-filters">
+            {% if user.role == "OWNER" %}
+                <input type="hidden" name="scope" value="{{ scope }}">
+            {% endif %}
+
+            <input class="tv-field"
+                   type="text"
+                   name="q"
+                   placeholder="Search document name..."
+                   value="{{ form.q.value|default:'' }}">
+
+            <input class="tv-field"
+                   type="text"
+                   name="owner"
+                   placeholder="Owner"
+                   value="{{ form.owner.value|default:'' }}">
+
+            <input class="tv-field"
+                   type="text"
+                   name="category"
+                   placeholder="Category"
+                   value="{{ form.category.value|default:'' }}">
+
+            <input class="tv-field"
+                   type="date"
+                   name="date_from"
+                   aria-label="Uploaded from date"
+                   value="{{ form.date_from.value|default:'' }}">
+
+            <input class="tv-field"
+                   type="date"
+                   name="date_to"
+                   aria-label="Uploaded to date"
+                   value="{{ form.date_to.value|default:'' }}">
+
+            <button type="submit" class="tv-btn">Filter</button>
+        </form>
+
+        <div class="tv-table-wrap">
+            <table class="tv-table">
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Uploader / Owner</th>
+                        <th>Category</th>
+                        <th>File Size</th>
+                        <th>Uploaded</th>
+                        <th>Download Access</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for d in documents %}
+                    <tr>
+                        <td>
+                            <span class="tv-file-icon">▤</span>
+                            <a class="tv-doc-link"
+                               href="{% url 'document_detail' d.pk %}">
+                                {{ d.name }}
+                            </a>
+                        </td>
+
+                        <td>{{ d.owner.username }}</td>
+
+                        <td>
+                            <span class="tv-category">
+                                {{ d.category|default:"General" }}
+                            </span>
+                        </td>
+
+                        <td>{{ d.size|filesizeformat }}</td>
+
+                        <td class="tv-muted">
+                            {{ d.uploaded_at|date:"Y-m-d H:i" }}
+                        </td>
+
+                        <td>
+                            {% if user.role == "VIEWER" %}
+
+                                {% if d.viewer_can_download %}
+                                    <a class="tv-btn"
+                                       href="{% url 'document_download' d.pk %}">
+                                        Download
+                                    </a>
+
+                                {% elif d.viewer_request and d.viewer_request.status == "pending" %}
+                                    <span class="tv-status-pending">
+                                        Pending Approval
+                                    </span>
+
+                                {% elif d.viewer_request and d.viewer_request.status == "rejected" %}
+                                    <span class="tv-status-rejected">
+                                        Request Rejected
+                                    </span>
+                                    <form method="post"
+                                          action="{% url 'request_download_access' d.pk %}"
+                                          style="margin-top:8px;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="tv-btn">
+                                            Request Again
+                                        </button>
+                                    </form>
+
+                                {% else %}
+                                    <form method="post"
+                                          action="{% url 'request_download_access' d.pk %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="tv-btn">
+                                            Request Download Access
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                            {% elif user.role == "OWNER" or user.role == "ADMIN" %}
+                                <a class="tv-btn"
+                                   href="{% url 'document_download' d.pk %}">
+                                    Download
+                                </a>
+                            {% else %}
+                                <span class="tv-muted">No action available</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="tv-empty">
+                            <div style="font-size:30px;margin-bottom:10px;">⌕</div>
+                            <strong>No documents found</strong>
+                            <p class="tv-muted" style="margin-top:8px;">
+                                Try changing your search filters.
+                            </p>
+
+                            {% if user.role == "OWNER" or user.role == "ADMIN" %}
+                            <a class="tv-upload-btn"
+                               href="{% url 'document_upload' %}">
+                                + Upload your first document
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+```

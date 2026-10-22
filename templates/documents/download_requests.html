@@ -1,0 +1,476 @@
+
+{% extends "base.html" %}
+
+{% block title %}Download Access Requests · TrustVault{% endblock %}
+
+{% block content %}
+<style>
+html, body {
+    min-height: 100vh !important;
+    background: #050b16 !important;
+    color: #eaf4ff !important;
+}
+
+.tv-requests,
+.tv-requests * {
+    box-sizing: border-box;
+}
+
+.tv-requests {
+    --cyan: #19c9ff;
+    --muted: #8ea4c1;
+    max-width: 1250px;
+    min-height: 85vh;
+    margin: 0 auto;
+    padding: 30px 20px;
+    color: #eaf4ff !important;
+}
+
+.tv-requests h1,
+.tv-requests h2,
+.tv-requests h3,
+.tv-requests p {
+    color: inherit;
+}
+
+.tv-eyebrow {
+    color: var(--cyan) !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.tv-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.tv-title {
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 850;
+    margin-bottom: 12px;
+    overflow-wrap: anywhere;
+}
+
+.tv-title span {
+    color: var(--cyan);
+}
+
+.tv-subtitle {
+    color: var(--muted) !important;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.tv-panel {
+    padding: clamp(18px, 3vw, 27px);
+    margin-bottom: 22px;
+    border: 1px solid rgba(25, 201, 255, .23);
+    border-radius: 16px;
+    background:
+        radial-gradient(ellipse at 100% 0%,
+        rgba(0, 153, 255, .09), transparent 45%),
+        linear-gradient(135deg, #0b1526, #071121) !important;
+    box-shadow: 0 0 23px rgba(0, 153, 255, .05);
+}
+
+.tv-panel-heading {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.tv-panel-subtitle {
+    color: var(--muted) !important;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 22px;
+}
+
+.tv-request-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 17px;
+}
+
+.tv-request-card {
+    min-width: 0;
+    padding: 22px;
+    border: 1px solid #1c3b58;
+    border-radius: 13px;
+    background: linear-gradient(145deg, #0a1729, #07101e) !important;
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.tv-request-card:hover {
+    border-color: rgba(25, 201, 255, .55);
+    box-shadow: 0 0 18px rgba(0, 153, 255, .06);
+}
+
+.tv-document-name {
+    color: #63ddff !important;
+    font-size: 18px;
+    font-weight: 850;
+    margin-bottom: 18px;
+    overflow-wrap: anywhere;
+}
+
+.tv-metadata {
+    display: grid;
+    grid-template-columns: minmax(100px, .8fr) minmax(0, 1.2fr);
+    border: 1px solid #17334e;
+    border-radius: 9px;
+    overflow: hidden;
+}
+
+.tv-metadata dt,
+.tv-metadata dd {
+    min-width: 0;
+    margin: 0;
+    padding: 11px;
+    border-bottom: 1px solid #17334e;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.tv-metadata dt {
+    background: #0b1c30 !important;
+    color: #8fcfff !important;
+    font-weight: 750;
+}
+
+.tv-metadata dd {
+    background: #071321 !important;
+    color: #d5eaff !important;
+}
+
+.tv-metadata dt:last-of-type,
+.tv-metadata dd:last-of-type {
+    border-bottom: 0;
+}
+
+.tv-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 850;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.tv-status-pending {
+    color: #ffe49a !important;
+    background: rgba(255, 190, 50, .10) !important;
+    border: 1px solid rgba(255, 190, 50, .28);
+}
+
+.tv-status-approved {
+    color: #75f0b5 !important;
+    background: rgba(22, 199, 132, .10) !important;
+    border: 1px solid rgba(22, 199, 132, .28);
+}
+
+.tv-status-rejected {
+    color: #ff9cab !important;
+    background: rgba(255, 82, 104, .10) !important;
+    border: 1px solid rgba(255, 82, 104, .28);
+}
+
+.tv-request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 19px;
+}
+
+.tv-request-actions form {
+    margin: 0;
+}
+
+.tv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 11px 15px;
+    border: 1px solid #245b85;
+    border-radius: 8px;
+    background: #091a31 !important;
+    color: #a9dfff !important;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.tv-btn:hover {
+    filter: brightness(1.12);
+    border-color: var(--cyan);
+}
+
+.tv-btn-approve {
+    color: #8dffca !important;
+    background: rgba(22, 199, 132, .09) !important;
+    border-color: rgba(22, 199, 132, .42) !important;
+}
+
+.tv-btn-reject {
+    color: #ff9cab !important;
+    background: rgba(255, 82, 104, .08) !important;
+    border-color: rgba(255, 82, 104, .4) !important;
+}
+
+.tv-btn-back {
+    color: #a9dfff !important;
+    background: #091a31 !important;
+}
+
+.tv-empty {
+    padding: 40px 20px;
+    text-align: center;
+    border: 1px dashed #28506d;
+    border-radius: 12px;
+    background: #081425 !important;
+}
+
+.tv-empty-icon {
+    font-size: 34px;
+    color: var(--cyan) !important;
+    margin-bottom: 14px;
+}
+
+.tv-empty h3 {
+    color: #63ddff !important;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.tv-empty p {
+    color: var(--muted) !important;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.tv-messages {
+    margin-bottom: 20px;
+}
+
+.tv-message {
+    padding: 13px 15px;
+    margin-bottom: 8px;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    background: #091a31 !important;
+    color: #a9dfff !important;
+    font-size: 13px;
+}
+
+.tv-footer {
+    margin-top: 25px;
+    text-align: center;
+    color: #526984 !important;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+@media(max-width: 760px) {
+    .tv-request-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 500px) {
+    .tv-requests {
+        padding: 22px 11px;
+    }
+
+    .tv-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .tv-header .tv-btn {
+        width: 100%;
+    }
+
+    .tv-request-card {
+        padding: 15px;
+    }
+
+    .tv-metadata {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-metadata dt {
+        padding-bottom: 4px;
+        border-bottom: 0;
+    }
+
+    .tv-metadata dd {
+        padding-top: 4px;
+    }
+
+    .tv-request-actions {
+        flex-direction: column;
+    }
+
+    .tv-request-actions .tv-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="tv-requests">
+
+    <div class="tv-eyebrow">TRUSTVAULT / ACCESS CONTROL</div>
+
+    <header class="tv-header">
+        <div>
+            <h1 class="tv-title">
+                Download Access <span>Requests</span>
+            </h1>
+
+            <p class="tv-subtitle">
+                Review access requests and control who can download
+                your protected documents.
+            </p>
+        </div>
+
+        <a href="{% url 'documents' %}" class="tv-btn tv-btn-back">
+            ← Back to Documents
+        </a>
+    </header>
+
+    {% if messages %}
+        <div class="tv-messages">
+            {% for message in messages %}
+                <div class="tv-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="tv-panel">
+        <h2 class="tv-panel-heading">◇ Request Management</h2>
+
+        <p class="tv-panel-subtitle">
+            Only the uploader of each document can approve or reject
+            its download requests.
+        </p>
+
+        {% if requests %}
+            <div class="tv-request-grid">
+
+                {% for req in requests %}
+                    <article class="tv-request-card">
+
+                        <h3 class="tv-document-name">
+                            {{ req.document.name }}
+                        </h3>
+
+                        <dl class="tv-metadata">
+
+                            <dt>Requested by</dt>
+                            <dd>{{ req.requester.username }}</dd>
+
+                            <dt>Document owner</dt>
+                            <dd>{{ req.document.owner.username }}</dd>
+
+                            <dt>Category</dt>
+                            <dd>
+                                {{ req.document.category|default:"General" }}
+                            </dd>
+
+                            <dt>File name</dt>
+                            <dd>{{ req.document.original_filename }}</dd>
+
+                            <dt>Requested at</dt>
+                            <dd>
+                                {{ req.requested_at|date:"d M Y, H:i" }}
+                            </dd>
+
+                            <dt>Status</dt>
+                            <dd>
+                                {% if req.status == "pending" %}
+                                    <span class="tv-status tv-status-pending">
+                                        Pending
+                                    </span>
+                                {% elif req.status == "approved" %}
+                                    <span class="tv-status tv-status-approved">
+                                        Approved
+                                    </span>
+                                {% elif req.status == "rejected" %}
+                                    <span class="tv-status tv-status-rejected">
+                                        Rejected
+                                    </span>
+                                {% else %}
+                                    {{ req.get_status_display }}
+                                {% endif %}
+                            </dd>
+
+                            {% if req.reviewed_at %}
+                                <dt>Reviewed at</dt>
+                                <dd>
+                                    {{ req.reviewed_at|date:"d M Y, H:i" }}
+                                </dd>
+                            {% endif %}
+
+                        </dl>
+
+                        {% if req.status == "pending" %}
+                            <div class="tv-request-actions">
+
+                                <form method="post"
+                                      action="{% url 'review_download_request' req.pk 'approve' %}">
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="tv-btn tv-btn-approve">
+                                        ✓ Approve Download
+                                    </button>
+                                </form>
+
+                                <form method="post"
+                                      action="{% url 'review_download_request' req.pk 'reject' %}">
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="tv-btn tv-btn-reject">
+                                        ✕ Reject Request
+                                    </button>
+                                </form>
+
+                            </div>
+                        {% endif %}
+
+                    </article>
+                {% endfor %}
+
+            </div>
+        {% else %}
+            <div class="tv-empty">
+                <div class="tv-empty-icon">⌁</div>
+
+                <h3>No Download Requests</h3>
+
+                <p>
+                    There are no download requests for your uploaded documents yet.
+                    New requests will appear here when viewers request access.
+                </p>
+            </div>
+        {% endif %}
+    </section>
+
+    <footer class="tv-footer">
+        TRUSTVAULT · SECURE DOCUMENT ACCESS CONTROL
+    </footer>
+
+</div>
+{% endblock %}

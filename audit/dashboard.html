@@ -1,0 +1,303 @@
+
+{% extends "base.html" %}
+
+{% block title %}Activity Monitoring · TrustVault{% endblock %}
+
+{% block content %}
+<style>
+.audit-page {
+    --bg: #050b16;
+    --panel: #0b1526;
+    --border: #20334b;
+    --text: #eaf4ff;
+    --muted: #91a8c4;
+    --cyan: #19c9ff;
+    color: var(--text);
+    padding: 24px;
+    background: var(--bg);
+    min-height: 100vh;
+}
+.audit-page * { box-sizing: border-box; }
+.audit-heading { margin-bottom: 22px; }
+.audit-heading h1 { font-size: 27px; margin: 0 0 8px; }
+.audit-heading p { color: var(--muted); margin: 0; }
+.audit-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+    gap: 14px;
+    margin-bottom: 22px;
+}
+.audit-stat, .audit-panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    padding: 18px;
+    min-width: 0;
+}
+.audit-stat span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 10px;
+}
+.audit-stat strong { font-size: 27px; overflow-wrap: anywhere; }
+.audit-panel { margin-bottom: 20px; }
+.audit-panel h2 { font-size: 18px; margin: 0 0 16px; }
+.audit-filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+.audit-field label {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 7px;
+}
+.audit-field input, .audit-field select {
+    width: 100%;
+    min-width: 0;
+    padding: 11px;
+    color: var(--text);
+    background: #07101e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.audit-btn {
+    display: inline-block;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid var(--cyan);
+    border-radius: 8px;
+    background: #063047;
+    color: #eafaff;
+    padding: 10px 15px;
+    font-weight: 600;
+}
+.audit-btn.secondary {
+    border-color: var(--border);
+    background: #111e30;
+}
+.audit-table-wrap { overflow-x: auto; }
+.audit-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 850px;
+}
+.audit-table th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+.audit-table th, .audit-table td {
+    border-bottom: 1px solid var(--border);
+    padding: 13px 11px;
+    vertical-align: top;
+}
+.audit-table td { font-size: 13px; overflow-wrap: anywhere; }
+.audit-tag {
+    display: inline-block;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 7px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+.audit-success { color: #62e6ad; }
+.audit-denied, .audit-failure { color: #ff8b9a; }
+.audit-muted { color: var(--muted); }
+.audit-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 18px;
+}
+.audit-pagination-links { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 600px) {
+    .audit-page { padding: 14px; }
+    .audit-heading h1 { font-size: 22px; }
+}
+</style>
+
+<div class="audit-page">
+    <header class="audit-heading">
+        <h1>Activity Monitoring</h1>
+        <p>TrustVault security audit history and user activity.</p>
+    </header>
+
+    <section class="audit-stats">
+        <div class="audit-stat">
+            <span>Total Audit Events</span>
+            <strong>{{ stats.total_audit_events|default:"0" }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Total Users</span>
+            <strong>{{ stats.users }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Total Documents</span>
+            <strong>{{ stats.documents }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Uploads · 7 days</span>
+            <strong>{{ stats.uploads }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Downloads · 7 days</span>
+            <strong>{{ stats.downloads }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Permission Changes · 7 days</span>
+            <strong>{{ stats.permission_changes }}</strong>
+        </div>
+        <div class="audit-stat">
+            <span>Denied · 7 days</span>
+            <strong>{{ stats.denied }}</strong>
+        </div>
+    </section>
+
+    <section class="audit-panel">
+        <h2>Filter Activity</h2>
+        <form method="get" class="audit-filters">
+            <div class="audit-field">
+                <label for="audit-action">Action</label>
+                <select id="audit-action" name="action">
+                    <option value="">All actions</option>
+                    {% for value, label in actions %}
+                    <option value="{{ value }}" {% if f.action == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="audit-field">
+                <label for="audit-outcome">Outcome</label>
+                <select id="audit-outcome" name="outcome">
+                    <option value="">All outcomes</option>
+                    {% for value, label in outcomes %}
+                    <option value="{{ value }}" {% if f.outcome == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="audit-field">
+                <label for="audit-user">Username</label>
+                <input id="audit-user" type="text" name="user"
+                       value="{{ f.user }}" placeholder="Search username">
+            </div>
+
+            <div class="audit-field">
+                <label for="audit-document">Document ID</label>
+                <input id="audit-document" type="number" min="1" name="document"
+                       value="{{ f.document }}" placeholder="Document ID">
+            </div>
+
+            <button class="audit-btn" type="submit">Apply Filters</button>
+            <a class="audit-btn secondary" href="{% url 'audit:dashboard' %}">Clear</a>
+        </form>
+    </section>
+
+    <section class="audit-panel">
+        <h2>Complete Audit History</h2>
+        <p class="audit-muted">
+            Records are shown newest first. Use the page controls to browse older events.
+        </p>
+
+        <div class="audit-table-wrap">
+            <table class="audit-table">
+                <thead>
+                    <tr>
+                        <th>Date &amp; Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Outcome</th>
+                        <th>Document</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                    <tr>
+                        <td>{{ event.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td>
+                            {{ event.actor_username|default:"System / Unknown" }}
+                            {% if event.actor_id %}
+                            <div class="audit-muted">ID: {{ event.actor_id }}</div>
+                            {% endif %}
+                        </td>
+                        <td><span class="audit-tag">{{ event.get_action_display }}</span></td>
+                        <td>
+                            <span class="audit-tag
+                                {% if event.outcome == 'SUCCESS' %}audit-success
+                                {% elif event.outcome == 'DENIED' %}audit-denied
+                                {% else %}audit-failure{% endif %}">
+                                {{ event.get_outcome_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if event.document_id %}
+                                {{ event.document_name|default:"Document" }}
+                                <div class="audit-muted">ID: {{ event.document_id }}</div>
+                            {% else %}
+                                <span class="audit-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ event.detail|default:"—" }}</td>
+                        <td>{{ event.ip_address|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="audit-muted">
+                            No audit events match these filters.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if page_obj %}
+        <div class="audit-pagination">
+            <span class="audit-muted">
+                Page {{ page_obj.number }} of {{ paginator.num_pages|default:"1" }}
+                · {{ paginator.count }} matching records
+            </span>
+
+            <div class="audit-pagination-links">
+                {% if page_obj.has_previous %}
+                <a class="audit-btn secondary"
+                   href="?action={{ f.action|urlencode }}&amp;outcome={{ f.outcome|urlencode }}&amp;user={{ f.user|urlencode }}&amp;document={{ f.document|urlencode }}&amp;page=1">
+                    First
+                </a>
+                <a class="audit-btn secondary"
+                   href="?action={{ f.action|urlencode }}&amp;outcome={{ f.outcome|urlencode }}&amp;user={{ f.user|urlencode }}&amp;document={{ f.document|urlencode }}&amp;page={{ page_obj.previous_page_number }}">
+                    Previous
+                </a>
+                {% endif %}
+
+                {% if page_obj.has_next %}
+                <a class="audit-btn"
+                   href="?action={{ f.action|urlencode }}&amp;outcome={{ f.outcome|urlencode }}&amp;user={{ f.user|urlencode }}&amp;document={{ f.document|urlencode }}&amp;page={{ page_obj.next_page_number }}">
+                    Next
+                </a>
+                <a class="audit-btn secondary"
+                   href="?action={{ f.action|urlencode }}&amp;outcome={{ f.outcome|urlencode }}&amp;user={{ f.user|urlencode }}&amp;document={{ f.document|urlencode }}&amp;page={{ paginator.num_pages }}">
+                    Last
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

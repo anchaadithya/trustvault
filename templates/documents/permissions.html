@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3">Sharing: {{ doc.name }}</h1>
+<form method="post" class="row g-2 mb-3">{% csrf_token %}
+  <div class="col-md-4"><input class="form-control" name="username" placeholder="Username" required></div>
+  <div class="col-md-3"><select name="level" class="form-select"><option value="read">Read</option><option value="edit">Read + Edit</option></select></div>
+  <div class="col-md-2"><button class="btn btn-primary">Grant</button></div>
+  <div class="col-12 text-danger">{{ form.username.errors }}{{ form.level.errors }}</div>
+</form>
+<table class="table table-sm bg-white"><thead><tr><th>User</th><th>Access</th><th>Granted</th><th></th></tr></thead><tbody>
+{% for g in grants %}<tr><td>{{ g.user.username }}</td><td>{% if g.can_edit %}Read + Edit{% else %}Read{% endif %}</td><td>{{ g.granted_at|date:"Y-m-d H:i" }}</td>
+<td><form method="post" action="{% url 'document_revoke' doc.pk g.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-danger">Revoke</button></form></td></tr>
+{% empty %}<tr><td colspan="4" class="text-muted">Not shared with anyone.</td></tr>{% endfor %}</tbody></table>
+<p class="text-muted small">Revoking blocks the user's next request. It cannot erase copies they already downloaded.</p>
+<a href="{% url 'document_detail' doc.pk %}">Back</a>
+{% endblock %}

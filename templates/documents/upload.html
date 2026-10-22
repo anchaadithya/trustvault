@@ -1,0 +1,390 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Upload Document · TrustVault{% endblock %}
+
+{% block content %}
+
+
+<style>
+html,
+body {
+    min-height: 100vh;
+    background: #020817 !important;
+    color: #e5f4ff !important;
+}
+
+.tv-upload-page,
+.tv-upload-page * {
+    box-sizing: border-box;
+}
+
+.tv-upload-page {
+    --cyan: #00d9ff;
+    --border: rgba(0, 190, 255, .55);
+
+    width: 100%;
+    min-height: 85vh;
+    padding: 32px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    color: #e5f4ff !important;
+
+    background:
+        linear-gradient(
+            120deg,
+            rgba(1, 7, 20, .94),
+            rgba(2, 14, 36, .87),
+            rgba(1, 6, 19, .95)
+        ),
+        url("{% static 'images/trustvault-hacker-bg.png' %}")
+        center center / cover no-repeat;
+
+    box-shadow: 0 0 25px rgba(0, 153, 255, .13);
+}
+
+.tv-upload-page h1,
+.tv-upload-page h2,
+.tv-upload-page p,
+.tv-upload-page label {
+    color: inherit;
+}
+
+.tv-eyebrow {
+    color: var(--cyan) !important;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+
+.tv-title {
+    color: #f3f8ff !important;
+    font-size: clamp(30px, 4vw, 42px);
+    font-weight: 900;
+    margin: 0 0 12px;
+    text-shadow: 0 0 20px rgba(0, 140, 255, .3);
+}
+
+.tv-subtitle {
+    color: #9fcfff !important;
+    margin-bottom: 30px;
+}
+
+.tv-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(240px, .8fr);
+    gap: 22px;
+    align-items: start;
+}
+
+.tv-panel {
+    min-width: 0;
+    padding: 26px;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    background: rgba(2, 10, 26, .97) !important;
+    box-shadow: 0 0 22px rgba(0, 120, 255, .07);
+}
+
+.tv-panel-title {
+    color: #f1f7ff !important;
+    font-size: 21px;
+    font-weight: 900;
+    margin-bottom: 8px;
+}
+
+.tv-muted {
+    color: #91afd0 !important;
+}
+
+/* Form labels */
+.tv-upload-page form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #a9d6ff !important;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tv-field {
+    margin-bottom: 20px;
+}
+
+/* Dark form controls */
+.tv-upload-page input:not([type="checkbox"]):not([type="radio"]),
+.tv-upload-page select,
+.tv-upload-page textarea {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid #244668 !important;
+    border-radius: 9px;
+    outline: none;
+    background: #091a31 !important;
+    color: #e5f4ff !important;
+    box-shadow: none;
+    color-scheme: dark;
+}
+
+.tv-upload-page textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.tv-upload-page input::placeholder,
+.tv-upload-page textarea::placeholder {
+    color: #7899bd !important;
+    opacity: 1;
+}
+
+.tv-upload-page input:focus,
+.tv-upload-page select:focus,
+.tv-upload-page textarea:focus {
+    border-color: var(--cyan) !important;
+    box-shadow: 0 0 0 3px rgba(0, 190, 255, .12) !important;
+}
+
+/* File chooser */
+.tv-upload-page input[type="file"] {
+    padding: 8px !important;
+}
+
+.tv-upload-page input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 8px 12px;
+    border: 1px solid #087fbd;
+    border-radius: 6px;
+    background: #0b2b48;
+    color: #5be5ff;
+    cursor: pointer;
+}
+
+/* Validation messages */
+.tv-upload-page .errorlist {
+    padding: 10px 14px;
+    margin: 8px 0 12px;
+    list-style: none;
+    border: 1px solid #a83b59;
+    border-radius: 8px;
+    background: rgba(100, 15, 40, .3) !important;
+    color: #ff9db6 !important;
+    font-size: 13px;
+}
+
+.tv-upload-page .errorlist li {
+    color: #ff9db6 !important;
+}
+
+.tv-upload-page .helptext {
+    display: block;
+    margin-top: 6px;
+    color: #91afd0 !important;
+    font-size: 12px;
+}
+
+/* Upload button */
+.tv-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 51px;
+    padding: 13px 20px;
+    border: 1px solid #00e5ff;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #087cff, #00bddb);
+    color: #fff !important;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 0 20px rgba(0, 174, 255, .2);
+    transition: .2s ease;
+}
+
+.tv-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 28px rgba(0, 204, 255, .4);
+}
+
+/* Back button */
+.tv-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 45px;
+    margin-top: 10px;
+    padding: 11px 16px;
+    border: 1px solid #244668;
+    border-radius: 9px;
+    background: #091a31;
+    color: #a9d6ff !important;
+    font-weight: 700;
+    text-decoration: none;
+    transition: .2s ease;
+}
+
+.tv-cancel:hover {
+    border-color: var(--cyan);
+    color: #fff !important;
+}
+
+/* Security information cards */
+.tv-info-card {
+    padding: 18px;
+    margin-top: 16px;
+    border: 1px solid rgba(0, 190, 255, .3);
+    border-radius: 11px;
+    background: rgba(0, 100, 190, .08) !important;
+}
+
+.tv-info-heading {
+    margin-bottom: 8px;
+    color: #38dfff !important;
+    font-weight: 900;
+}
+
+.tv-info-text {
+    margin: 0;
+    color: #91afd0 !important;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Override light Bootstrap elements within portal */
+.tv-upload-page .bg-white,
+.tv-upload-page .bg-light,
+.tv-upload-page .card,
+.tv-upload-page .card-body {
+    background-color: #061328 !important;
+    color: #e5f4ff !important;
+}
+
+@media (max-width: 850px) {
+    .tv-upload-page {
+        padding: 20px 14px;
+    }
+
+    .tv-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-panel {
+        padding: 20px;
+    }
+}
+</style>
+
+<div class="tv-upload-page">
+
+    <div class="tv-eyebrow">TrustVault / Secure Storage</div>
+
+    <h1 class="tv-title">Upload Document</h1>
+
+    <p class="tv-subtitle">
+        Securely upload and manage your files in the TrustVault repository.
+    </p>
+
+    <div class="tv-layout">
+
+        <!-- Upload form -->
+        <section class="tv-panel">
+
+            <h2 class="tv-panel-title">◇ New Document</h2>
+
+            <p class="tv-muted mb-4">
+                Select a file and provide the required document details.
+            </p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    {{ form.non_field_errors }}
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="tv-field">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                            {% if field.field.required %}
+                                <span style="color:#00d9ff;">*</span>
+                            {% endif %}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <span class="helptext">
+                                {{ field.help_text }}
+                            </span>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            {{ field.errors }}
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="tv-submit">
+                    ↑ Upload Securely
+                </button>
+
+                <a href="/docs/" class="tv-cancel">
+                    ← Back to Documents
+                </a>
+
+            </form>
+        </section>
+
+        <!-- Security information -->
+        <aside class="tv-panel">
+
+            <h2 class="tv-panel-title">◇ Security Status</h2>
+
+            <div class="tv-info-card">
+                <div class="tv-info-heading">▣ Secure Storage</div>
+                <p class="tv-info-text">
+                    Files are processed through the existing TrustVault
+                    upload workflow.
+                </p>
+            </div>
+
+            <div class="tv-info-card">
+                <div class="tv-info-heading">⌘ Access Control</div>
+                <p class="tv-info-text">
+                    Document access follows your application's existing
+                    authorization rules.
+                </p>
+            </div>
+
+            <div class="tv-info-card">
+                <div class="tv-info-heading">✓ Required Fields</div>
+                <p class="tv-info-text">
+                    Complete the required fields and select the correct file
+                    before submitting.
+                </p>
+            </div>
+
+            <div class="tv-info-card">
+                <div class="tv-info-heading">⚠ File Safety</div>
+                <p class="tv-info-text">
+                    Upload only permitted file types and files you are
+                    authorized to store.
+                </p>
+            </div>
+
+        </aside>
+
+    </div>
+</div>
+
+{% endblock %}

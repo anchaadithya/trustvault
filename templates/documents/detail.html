@@ -1,0 +1,464 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if protected_document %}
+        Document Access Required · TrustVault
+    {% else %}
+        {{ document.name }} · TrustVault
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<style>
+html, body {
+    min-height: 100vh !important;
+    background: #020817 !important;
+    color: #e5f4ff !important;
+}
+
+.tv-detail, .tv-detail * {
+    box-sizing: border-box;
+}
+
+.tv-detail {
+    --cyan: #00d9ff;
+    width: 100%;
+    min-height: 85vh;
+    padding: 30px;
+    border: 1px solid #12577c;
+    border-radius: 18px;
+    background: linear-gradient(120deg, #010714, #020e24);
+    color: #e5f4ff;
+    box-shadow: 0 0 25px rgba(0,153,255,.12);
+}
+
+.tv-title {
+    color: #f3f8ff;
+    font-size: clamp(28px,4vw,40px);
+    font-weight: 900;
+    overflow-wrap: anywhere;
+}
+
+.tv-eyebrow {
+    margin-bottom: 10px;
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 4px;
+}
+
+.tv-subtitle {
+    margin: 10px 0 26px;
+    color: #9fcfff;
+}
+
+.tv-panel {
+    margin-bottom: 22px;
+    padding: 24px;
+    border: 1px solid rgba(0,190,255,.4);
+    border-radius: 14px;
+    background: #020d20;
+}
+
+.tv-section-title {
+    margin-bottom: 20px;
+    color: #f3f8ff;
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.tv-metadata {
+    display: grid;
+    grid-template-columns: minmax(130px,.7fr) minmax(0,1.5fr);
+    margin: 0;
+    border: 1px solid #173c5b;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.tv-metadata dt,
+.tv-metadata dd {
+    margin: 0;
+    padding: 15px 16px;
+    border-bottom: 1px solid #173c5b;
+    overflow-wrap: anywhere;
+}
+
+.tv-metadata dt {
+    background: #091a30;
+    color: #8fcfff;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.tv-metadata dd {
+    background: #030f20;
+    color: #e5f4ff;
+}
+
+.tv-access {
+    display: inline-block;
+    padding: 6px 11px;
+    border: 1px solid rgba(0,217,255,.4);
+    border-radius: 20px;
+    color: #42e4ff;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tv-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.tv-detail .tv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 17px;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    background: #091a31;
+    color: #a9dfff;
+    font-weight: 800;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.tv-detail .tv-btn-primary {
+    border-color: var(--cyan);
+    background: linear-gradient(135deg,#087cff,#00bddb);
+    color: white;
+}
+
+.tv-detail .tv-btn-danger {
+    border-color: #8e354e;
+    color: #ff9db6;
+}
+
+.tv-notice {
+    padding: 15px;
+    margin: 15px 0;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    color: #a9dfff;
+    background: #071a30;
+    overflow-wrap: anywhere;
+}
+
+.tv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tv-detail .tv-table {
+    width: 100%;
+    min-width: 650px;
+    border-collapse: collapse;
+}
+
+.tv-detail .tv-table th,
+.tv-detail .tv-table td {
+    padding: 13px;
+    border-bottom: 1px solid #173c5b;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+.tv-detail .tv-table th {
+    color: #8fdcff;
+}
+
+.tv-detail .tv-table td {
+    color: #d5eaff;
+}
+
+.tv-detail form {
+    margin: 0;
+}
+
+@media(max-width:650px) {
+    .tv-detail {
+        padding: 20px 13px;
+    }
+
+    .tv-panel {
+        padding: 17px;
+    }
+
+    .tv-metadata {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-metadata dt {
+        padding-bottom: 5px;
+        border-bottom: 0;
+    }
+
+    .tv-metadata dd {
+        padding-top: 5px;
+    }
+
+    .tv-actions {
+        flex-direction: column;
+    }
+
+    .tv-actions .tv-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="tv-detail">
+    <div class="tv-eyebrow">TrustVault / Secure Storage</div>
+
+    {% if protected_document %}
+
+        <h1 class="tv-title">Document Access Required</h1>
+
+        <p class="tv-subtitle">
+            This document is protected. The uploader must approve
+            your view access before you can see its details.
+        </p>
+
+        <section class="tv-panel">
+            <h2 class="tv-section-title">◇ View Permission</h2>
+
+            {% if view_request and view_request.status == "pending" %}
+
+                <div class="tv-notice">
+                    Your view access request is pending.
+                    Please wait for the document owner to review it.
+                </div>
+
+            {% else %}
+
+                {% if view_request and view_request.status == "approved" %}
+                    <div class="tv-notice">
+                        Your previous view approval has expired.
+                        You must request access again.
+                    </div>
+                {% elif view_request and view_request.status == "rejected" %}
+                    <div class="tv-notice">
+                        Your previous view request was rejected.
+                        You can submit a new request.
+                    </div>
+                {% endif %}
+
+                <form method="post"
+                      action="{% url 'request_view_access' protected_document_id %}">
+                    {% csrf_token %}
+
+                    <button type="submit" class="tv-btn tv-btn-primary">
+                        Request View Access
+                    </button>
+                </form>
+
+            {% endif %}
+
+            <div class="tv-actions">
+                <a class="tv-btn" href="{% url 'documents' %}">
+                    ← Back to Documents
+                </a>
+            </div>
+        </section>
+
+    {% else %}
+
+        <h1 class="tv-title">{{ document.name }}</h1>
+
+        <p class="tv-subtitle">
+            Document information and download permissions.
+        </p>
+
+        <section class="tv-panel">
+            <h2 class="tv-section-title">◇ Document Information</h2>
+
+            <dl class="tv-metadata">
+                <dt>Owner / Uploader</dt>
+                <dd>{{ document.owner.username }}</dd>
+
+                <dt>Category</dt>
+                <dd>{{ document.category|default:"General" }}</dd>
+
+                <dt>File name</dt>
+                <dd>{{ document.original_filename }}</dd>
+
+                <dt>File size</dt>
+                <dd>{{ document.size|filesizeformat }}</dd>
+
+                <dt>Uploaded</dt>
+                <dd>{{ document.uploaded_at|date:"Y-m-d H:i:s" }}</dd>
+
+                <dt>Your access</dt>
+                <dd>
+                    <span class="tv-access">
+                        {% if is_document_owner %}
+                            Owner — Full access
+                        {% elif can_download %}
+                            Download approved
+                        {% else %}
+                            Download not approved
+                        {% endif %}
+                    </span>
+                </dd>
+            </dl>
+
+            {% if view_request %}
+                <div class="tv-notice">
+                    View request status:
+                    <strong>{{ view_request.get_status_display }}</strong>
+
+                    {% if view_request.status == "approved" and view_request.approval_expires_at %}
+                        <p>
+                            View approval expires:
+                            {{ view_request.approval_expires_at|date:"Y-m-d H:i:s" }}
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if download_request %}
+                <div class="tv-notice">
+                    Download request status:
+                    <strong>{{ download_request.get_status_display }}</strong>
+
+                    {% if download_request.status == "approved" %}
+                        {% if download_request.downloaded_at %}
+                            <p>This approval has already been used.</p>
+                        {% elif download_request.approval_expires_at %}
+                            {% if can_download %}
+                                <p>Your approval is active. Download before it expires.</p>
+                                <p>
+                                    Approval expires:
+                                    {{ download_request.approval_expires_at|date:"Y-m-d H:i:s" }}
+                                </p>
+                            {% else %}
+                                <p>Your approval has expired. Submit a new request.</p>
+                            {% endif %}
+                        {% else %}
+                            <p>Fresh approval is required. Submit a new request.</p>
+                        {% endif %}
+                    {% elif download_request.status == "pending" %}
+                        <p>Waiting for the document owner to review your request.</p>
+                    {% elif download_request.status == "rejected" %}
+                        <p>Your previous request was rejected. You may submit a new request.</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if not is_document_owner and not can_download %}
+                <div class="tv-notice">
+                    Downloading this document requires separate approval
+                    from the document uploader.
+                </div>
+            {% endif %}
+
+            <div class="tv-actions">
+                {% if is_document_owner %}
+
+                    <a class="tv-btn tv-btn-primary"
+                       href="{% url 'document_download' document.pk %}">
+                        ↓ Download Document
+                    </a>
+
+                    <a class="tv-btn"
+                       href="{% url 'document_edit' document.pk %}">
+                        ✎ Edit Details
+                    </a>
+
+                    <a class="tv-btn"
+                       href="{% url 'document_permissions' document.pk %}">
+                        Manage Sharing
+                    </a>
+
+                    <form method="post"
+                          action="{% url 'document_delete' document.pk %}"
+                          onsubmit="return confirm('Delete this document permanently?');">
+                        {% csrf_token %}
+                        <button type="submit" class="tv-btn tv-btn-danger">
+                            Delete Document
+                        </button>
+                    </form>
+
+                {% else %}
+
+                    {% if can_download %}
+
+                        <a class="tv-btn tv-btn-primary"
+                           href="{% url 'document_download' document.pk %}">
+                            ↓ Download Document
+                        </a>
+
+                    {% elif not download_request or download_request.status != "pending" %}
+
+                        <form method="post"
+                              action="{% url 'request_download_access' document.pk %}">
+                            {% csrf_token %}
+
+                            <button type="submit" class="tv-btn tv-btn-primary">
+                                Request Download Access
+                            </button>
+                        </form>
+
+                    {% else %}
+
+                        <span class="tv-btn">
+                            ⏳ Download Request Pending
+                        </span>
+
+                    {% endif %}
+
+                {% endif %}
+
+                <a class="tv-btn" href="{% url 'documents' %}">
+                    ← Back to Documents
+                </a>
+            </div>
+        </section>
+
+        {% if is_document_owner %}
+            <section class="tv-panel">
+                <h2 class="tv-section-title">◇ Activity on This Document</h2>
+
+                <div class="tv-table-wrap">
+                    <table class="tv-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Outcome</th>
+                                <th>Detail</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for e in events %}
+                                <tr>
+                                    <td>{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
+                                    <td>{{ e.actor_username }}</td>
+                                    <td>{{ e.action }}</td>
+                                    <td>{{ e.outcome }}</td>
+                                    <td>{{ e.detail|default:"—" }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5">No activity recorded.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        {% endif %}
+
+    {% endif %}
+</div>
+{% endblock %}

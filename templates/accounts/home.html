@@ -1,0 +1,882 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#050b16">
+    <title>TrustVault | Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #050b16;
+            --panel: #0b1526;
+            --line: rgba(66, 160, 230, .19);
+            --blue: #19c9ff;
+            --muted: #8ea4c1;
+            --white: #eaf4ff;
+        }
+
+        html, body {
+            min-height: 100%;
+            background: var(--bg);
+        }
+
+        body {
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--white);
+            background:
+                radial-gradient(
+                    ellipse at 65% 0%,
+                    rgba(0, 124, 220, .12),
+                    transparent 38%
+                ),
+                var(--bg);
+            min-height: 100vh;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        button, a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* SIDEBAR */
+
+        .sidebar {
+            width: 250px;
+            flex-shrink: 0;
+            min-height: 100vh;
+            padding: 27px 17px;
+            background: rgba(7, 17, 32, .98);
+            border-right: 1px solid var(--line);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 10px 30px;
+            border-bottom: 1px solid var(--line);
+            color: var(--white);
+        }
+
+        .brand-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(25, 201, 255, .5);
+            border-radius: 13px;
+            background: rgba(25, 201, 255, .1);
+            color: var(--blue);
+            font-size: 25px;
+        }
+
+        .brand-name {
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -.5px;
+        }
+
+        .brand-name span,
+        .topbar h1 span,
+        .welcome h2 span {
+            color: var(--blue);
+        }
+
+        .brand-caption {
+            margin-top: 4px;
+            font-size: 9px;
+            letter-spacing: 1.8px;
+            color: var(--muted);
+        }
+
+        .nav-label {
+            margin: 27px 10px 12px;
+            color: #617a99;
+            font-size: 10px;
+            letter-spacing: 2px;
+            font-weight: 800;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 14px;
+            margin-bottom: 6px;
+            color: #9db2cd;
+            font-size: 13px;
+            border: 1px solid transparent;
+            border-radius: 11px;
+            transition: .2s;
+        }
+
+        .nav-link .nav-icon {
+            width: 21px;
+            flex-shrink: 0;
+            text-align: center;
+            font-size: 17px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #4edfff;
+            border-color: rgba(25, 201, 255, .2);
+            background: linear-gradient(
+                90deg,
+                rgba(25, 201, 255, .13),
+                rgba(25, 201, 255, .025)
+            );
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            min-width: 21px;
+            padding: 3px 7px;
+            text-align: center;
+            border-radius: 20px;
+            background: #e63946;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .sidebar-bottom {
+            margin-top: auto;
+        }
+
+        .account-box {
+            padding: 15px 12px;
+            margin-top: 25px;
+            border: 1px solid var(--line);
+            border-radius: 13px;
+            background: var(--panel);
+        }
+
+        .account-user {
+            font-size: 13px;
+            font-weight: 750;
+            overflow-wrap: anywhere;
+        }
+
+        .account-role {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .logout {
+            display: block;
+            width: 100%;
+            margin-top: 13px;
+            padding: 10px;
+            border: 1px solid rgba(255, 110, 130, .25);
+            border-radius: 9px;
+            background: rgba(255, 80, 105, .06);
+            color: #ff9cab;
+            cursor: pointer;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .logout:hover {
+            background: rgba(255, 80, 105, .14);
+        }
+
+        /* MAIN CONTENT */
+
+        .main {
+            flex: 1;
+            min-width: 0;
+            padding: 32px clamp(18px, 4vw, 48px);
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 31px;
+        }
+
+        .breadcrumb {
+            color: #7088a6;
+            font-size: 12px;
+            margin-bottom: 9px;
+        }
+
+        .breadcrumb span {
+            color: var(--blue);
+        }
+
+        .topbar h1 {
+            font-size: clamp(25px, 3vw, 34px);
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 13px;
+            border: 1px solid rgba(38, 218, 166, .23);
+            border-radius: 30px;
+            background: rgba(38, 218, 166, .055);
+            color: #70e8c1;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .green-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #34e4ad;
+            box-shadow: 0 0 10px #34e4ad;
+        }
+
+        /* WELCOME */
+
+        .welcome {
+            position: relative;
+            overflow: hidden;
+            padding: clamp(23px, 4vw, 37px);
+            border: 1px solid rgba(25, 201, 255, .26);
+            border-radius: 20px;
+            background:
+                radial-gradient(
+                    ellipse at 95% 0%,
+                    rgba(0, 167, 255, .17),
+                    transparent 48%
+                ),
+                linear-gradient(120deg, #0c1b30, #091426);
+        }
+
+        .welcome::after {
+            content: "⌬";
+            position: absolute;
+            right: 30px;
+            top: -48px;
+            color: rgba(25, 201, 255, .065);
+            font-size: 210px;
+            pointer-events: none;
+        }
+
+        .eyebrow {
+            position: relative;
+            z-index: 1;
+            color: var(--blue);
+            font-size: 10px;
+            letter-spacing: 2.5px;
+            font-weight: 800;
+            margin-bottom: 17px;
+        }
+
+        .welcome h2 {
+            position: relative;
+            z-index: 1;
+            font-size: clamp(25px, 3vw, 35px);
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .welcome p {
+            position: relative;
+            z-index: 1;
+            max-width: 580px;
+            color: #9bb1cb;
+            font-size: 13px;
+            line-height: 1.9;
+        }
+
+        .role-pill {
+            position: relative;
+            z-index: 1;
+            display: inline-block;
+            margin-top: 22px;
+            padding: 8px 12px;
+            border: 1px solid rgba(25, 201, 255, .27);
+            border-radius: 8px;
+            background: rgba(25, 201, 255, .07);
+            color: #5bdfff;
+            font-size: 11px;
+            font-weight: 750;
+        }
+
+        /* STATISTICS */
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 30px 0 16px;
+        }
+
+        .section-heading h2 {
+            font-size: 16px;
+            font-weight: 750;
+        }
+
+        .section-heading small {
+            color: #7189a6;
+            font-size: 11px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            padding: 21px;
+            min-width: 0;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: linear-gradient(145deg, #0d1b2e, #091323);
+        }
+
+        .stat-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .stat-label {
+            color: #8ea5c1;
+            font-size: 11px;
+            line-height: 1.6;
+        }
+
+        .stat-icon {
+            display: grid;
+            place-items: center;
+            width: 37px;
+            height: 37px;
+            border: 1px solid rgba(25, 201, 255, .19);
+            border-radius: 11px;
+            background: rgba(25, 201, 255, .08);
+            color: var(--blue);
+            font-size: 19px;
+        }
+
+        .stat-value {
+            margin-top: 19px;
+            font-size: 27px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .stat-note {
+            margin-top: 6px;
+            color: #728aa8;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        /* LOWER PANELS */
+
+        .lower-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(230px, .8fr);
+            gap: 16px;
+            margin-top: 18px;
+        }
+
+        .panel {
+            min-width: 0;
+            padding: 22px;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: #0a1525;
+        }
+
+        .panel h3 {
+            font-size: 14px;
+            margin-bottom: 7px;
+        }
+
+        .panel-subtitle {
+            color: #8197b2;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(110, 155, 200, .1);
+        }
+
+        .activity-item:last-child {
+            border-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .activity-icon {
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            color: var(--blue);
+            background: rgba(25, 201, 255, .09);
+        }
+
+        .activity-title {
+            font-size: 12px;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .activity-desc {
+            margin-top: 5px;
+            color: #849ab6;
+            font-size: 11px;
+            line-height: 1.6;
+            overflow-wrap: anywhere;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            color: #d9ebff;
+            font-size: 12px;
+            transition: .2s;
+        }
+
+        .quick-link:hover {
+            border-color: rgba(25, 201, 255, .4);
+            background: rgba(25, 201, 255, .05);
+            color: var(--blue);
+        }
+
+        .quick-link span:last-child {
+            color: var(--blue);
+            font-size: 17px;
+        }
+
+        .footer {
+            margin-top: 25px;
+            color: #526984;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1050px) {
+            .sidebar {
+                width: 215px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .lower-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                padding: 15px;
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .brand {
+                padding-bottom: 15px;
+            }
+
+            .nav-label {
+                margin-top: 15px;
+            }
+
+            .nav-link {
+                display: inline-flex;
+                padding: 10px;
+                margin-right: 3px;
+            }
+
+            .sidebar nav {
+                display: flex;
+                flex-wrap: wrap;
+            }
+
+            .sidebar-bottom {
+                margin-top: 10px;
+            }
+
+            .account-box {
+                margin-top: 10px;
+            }
+
+            .main {
+                padding: 23px 15px;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 18px;
+            }
+
+            .system-status {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="layout">
+
+    <aside class="sidebar">
+
+        <a href="{% url 'home' %}" class="brand">
+            <div class="brand-icon">⬡</div>
+            <div>
+                <div class="brand-name">Trust<span>Vault</span></div>
+                <div class="brand-caption">SECURE WORKSPACE</div>
+            </div>
+        </a>
+
+        <div class="nav-label">WORKSPACE</div>
+
+        <nav>
+            <a href="{% url 'home' %}" class="nav-link active">
+                <span class="nav-icon">⌂</span>
+                Dashboard
+            </a>
+
+            {% if user.role == "ADMIN" %}
+
+                <a href="{% url 'user_list' %}" class="nav-link">
+                    <span class="nav-icon">♙</span>
+                    User Management
+                </a>
+
+                <a href="{% url 'audit:dashboard' %}" class="nav-link">
+                    <span class="nav-icon">⌁</span>
+                    Audit Dashboard
+                </a>
+
+                <a href="{% url 'documents' %}" class="nav-link">
+                    <span class="nav-icon">▤</span>
+                    Documents
+                </a>
+
+            {% elif user.role == "OWNER" %}
+
+                <a href="{% url 'documents' %}" class="nav-link">
+                    <span class="nav-icon">▤</span>
+                    My Documents
+                </a>
+
+                <a href="{% url 'download_requests' %}" class="nav-link">
+                    <span class="nav-icon">⇩</span>
+                    <span>Download Access Requests</span>
+
+                    {% if owner_pending_request_count %}
+                        <span class="nav-badge">
+                            {{ owner_pending_request_count }}
+                        </span>
+                    {% endif %}
+                </a>
+
+            {% elif user.is_authenticated %}
+
+                <a href="{% url 'documents' %}" class="nav-link">
+                    <span class="nav-icon">▤</span>
+                    Shared Documents
+                </a>
+
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="nav-label">ACCOUNT</div>
+
+            <div class="account-box">
+                <div class="account-user">{{ user.username }}</div>
+                <div class="account-role">{{ user.get_role_display }}</div>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout">
+                        ↪ &nbsp; Log out
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+            <div>
+                <div class="breadcrumb">
+                    TRUSTVAULT / <span>DASHBOARD</span>
+                </div>
+                <h1>Control <span>Center</span></h1>
+            </div>
+
+            <div class="system-status">
+                <span class="green-dot"></span>
+                ACCOUNT SIGNED IN
+            </div>
+        </header>
+
+        <section class="welcome">
+            <div class="eyebrow">SECURE WORKSPACE / OVERVIEW</div>
+
+            <h2>
+                Welcome back, <span>{{ user.username }}</span>
+            </h2>
+
+            <p>
+                Your digital workspace is ready. Access your documents,
+                manage permitted resources and review your workspace activity.
+            </p>
+
+            <span class="role-pill">
+                ◈ &nbsp; {{ user.get_role_display }}
+            </span>
+        </section>
+
+        <div class="section-heading">
+            <h2>Workspace Statistics</h2>
+            <small>Overview of your workspace</small>
+        </div>
+
+        <section class="stats">
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">DOCUMENTS</div>
+                    <div class="stat-icon">▤</div>
+                </div>
+
+                <div class="stat-value">
+                    {% if documents_count != None %}
+                        {{ documents_count }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+
+                <div class="stat-note">
+                    Document count provided by the dashboard view
+                </div>
+            </article>
+
+            {% if user.role == "ADMIN" %}
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">USER ACCOUNTS</div>
+                        <div class="stat-icon">♙</div>
+                    </div>
+
+                    <div class="stat-value">
+                        {% if users_count != None %}
+                            {{ users_count }}
+                        {% else %}
+                            —
+                        {% endif %}
+                    </div>
+
+                    <div class="stat-note">
+                        Total user accounts
+                    </div>
+                </article>
+
+            {% else %}
+
+                <article class="stat-card">
+                    <div class="stat-top">
+                        <div class="stat-label">ACCOUNT ROLE</div>
+                        <div class="stat-icon">◈</div>
+                    </div>
+
+                    <div class="stat-value" style="font-size:19px;">
+                        {{ user.get_role_display }}
+                    </div>
+
+                    <div class="stat-note">
+                        Your current account role
+                    </div>
+                </article>
+
+            {% endif %}
+
+            <article class="stat-card">
+                <div class="stat-top">
+                    <div class="stat-label">RECENT EVENTS</div>
+                    <div class="stat-icon">⌁</div>
+                </div>
+
+                <div class="stat-value">
+                    {% if recent_activity %}
+                        {{ recent_activity|length }}
+                    {% else %}
+                        0
+                    {% endif %}
+                </div>
+
+                <div class="stat-note">
+                    Recent activity entries supplied by the dashboard view
+                </div>
+            </article>
+
+        </section>
+
+        <section class="lower-grid">
+
+            <div class="panel">
+                <h3>Recent Activity</h3>
+                <p class="panel-subtitle">
+                    Latest activity provided by your system.
+                </p>
+
+                {% for activity in recent_activity %}
+
+                    <div class="activity-item">
+                        <div class="activity-icon">⌁</div>
+
+                        <div>
+                            <div class="activity-title">
+                                {{ activity.action|default:"System activity" }}
+                            </div>
+
+                            <div class="activity-desc">
+                                {% if activity.timestamp %}
+                                    {{ activity.timestamp|date:"d M Y, h:i A" }}
+                                {% endif %}
+
+                                {% if activity.description %}
+                                    <br>{{ activity.description }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                {% empty %}
+
+                    <div class="activity-item">
+                        <div class="activity-icon">i</div>
+
+                        <div>
+                            <div class="activity-title">
+                                No recent activity available
+                            </div>
+
+                            <div class="activity-desc">
+                                Activity will appear here when the dashboard
+                                view supplies recent event data.
+                            </div>
+                        </div>
+                    </div>
+
+                {% endfor %}
+            </div>
+
+            <div class="panel">
+                <h3>Quick Access</h3>
+                <p class="panel-subtitle">
+                    Open the tools available to your account.
+                </p>
+
+                {% if user.role == "ADMIN" %}
+
+                    <a href="{% url 'user_list' %}" class="quick-link">
+                        <span>♙ &nbsp; Manage Users</span>
+                        <span>→</span>
+                    </a>
+
+                    <a href="{% url 'audit:dashboard' %}" class="quick-link">
+                        <span>⌁ &nbsp; Audit Dashboard</span>
+                        <span>→</span>
+                    </a>
+
+                    <a href="{% url 'documents' %}" class="quick-link">
+                        <span>▤ &nbsp; All Documents</span>
+                        <span>→</span>
+                    </a>
+
+                {% elif user.role == "OWNER" %}
+
+                    <a href="{% url 'documents' %}" class="quick-link">
+                        <span>▤ &nbsp; Manage Documents</span>
+                        <span>→</span>
+                    </a>
+
+                    <a href="{% url 'download_requests' %}" class="quick-link">
+                        <span>⇩ &nbsp; Download Access Requests</span>
+                        <span>→</span>
+                    </a>
+
+                {% else %}
+
+                    <a href="{% url 'documents' %}" class="quick-link">
+                        <span>◉ &nbsp; Shared Documents</span>
+                        <span>→</span>
+                    </a>
+
+                {% endif %}
+            </div>
+
+        </section>
+
+        <div class="footer">
+            TRUSTVAULT · SECURE DOCUMENT WORKSPACE
+        </div>
+
+    </main>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TrustVault – interactive demo</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f4f5f7;--surface:#fff;--text:#1c2430;--muted:#6b7280;--border:#d9dde3;--primary:#0d6efd;--danger:#dc3545;--dangerbg:#fde8ea;--okbg:#d1e7dd;--ok:#0a3622;--warnbg:#fff3cd;--warn:#664d03;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171c;--surface:#1d2229;--text:#e6e9ee;--muted:#9aa3b0;--border:#333b46;--primary:#6ea8fe;--dangerbg:#3a1d21;--okbg:#14301f;--ok:#8fe0b3;--warnbg:#3a3015;--warn:#f1d98a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14171c;--surface:#1d2229;--text:#e6e9ee;--muted:#9aa3b0;--border:#333b46;--primary:#6ea8fe;--dangerbg:#3a1d21;--okbg:#14301f;--ok:#8fe0b3;--warnbg:#3a3015;--warn:#f1d98a;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1050px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:0 0 8px}
+.muted{color:var(--muted);font-size:13px}
+.note{background:var(--warnbg);color:var(--warn);padding:8px 12px;border-radius:6px;font-size:13px;margin:8px 0 14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,input,select{font:inherit;border-radius:6px;border:1px solid var(--border);background:var(--surface);color:var(--text);padding:5px 12px}
+button{cursor:pointer}button.p{background:var(--primary);border-color:var(--primary);color:#fff}
+button.who.on{background:var(--primary);border-color:var(--primary);color:#fff}
+button.d{color:var(--danger);border-color:var(--danger)}button.s{padding:2px 9px;font-size:13px}
+.res{padding:9px 12px;border-radius:6px;margin-top:10px;font-weight:500;min-height:40px}
+.res.ok{background:var(--okbg);color:var(--ok)}.res.bad{background:var(--dangerbg);color:var(--danger)}.res.info{background:var(--bg)}
+.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}th{color:var(--muted)}
+tr.denied td{background:var(--dangerbg)}
+.cap{font-size:16px;font-weight:600}
+.badge{font-size:12px;border:1px solid var(--border);border-radius:10px;padding:0 8px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>🔐 TrustVault – interactive demo</h1>
+<div class="muted">Follows <code>DEMO_CHECKLIST.md</code>. Try it yourself, or press the guided demo.</div>
+<div class="note">This is a browser simulation of TrustVault’s authorization and audit rules – not the running Django app. Behaviour mirrors <code>documents/permissions.py</code>: deny by default, 404 for no access, 403 for insufficient access, permissions checked on every request, admins never read contents.</div>
+
+<div class="card">
+  <div class="row"><button class="p" id="guided">▶ Run guided demo</button><button id="reset">Reset</button><span class="muted" id="cap"></span></div>
+</div>
+
+<div class="card">
+  <h2>Acting as</h2>
+  <div class="row" id="who"></div>
+  <div class="muted" id="whoinfo" style="margin-top:6px"></div>
+</div>
+
+<div class="row" style="align-items:stretch">
+  <div class="card" style="flex:2 1 420px">
+    <h2>Documents I can see</h2>
+    <div class="row" id="uploadbar" style="margin-bottom:8px"><input id="uname" placeholder="File name (e.g. Contract.pdf)" value="Contract.pdf"><button id="upload">Upload</button></div>
+    <div class="scroll"><table><thead><tr><th>ID</th><th>Name</th><th>Owner</th><th>My access</th><th>Actions</th></tr></thead><tbody id="doclist"></tbody></table></div>
+    <h2 style="margin-top:14px">Poke at a document ID <span class="badge">IDOR test</span></h2>
+    <div class="row"><input id="did" type="number" placeholder="Document ID" style="width:140px" value="1">
+      <button data-poke="download">Download</button><button data-poke="edit">Edit</button><button data-poke="delete" class="d">Delete</button><button data-poke="share">Grant myself access</button></div>
+    <h2 style="margin-top:14px">Other attempts</h2>
+    <div class="row"><button id="adm">Open /audit/ dashboard</button><button id="brute">Wrong password ×5 as bob</button></div>
+    <div class="res info" id="res">Choose a user and try something.</div>
+  </div>
+  <div class="card" style="flex:1 1 260px" id="sharebox">
+    <h2>Sharing</h2><div class="muted">Select “Share” on one of your documents.</div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Audit trail <span class="badge">append-only: no edit / delete buttons exist</span></h2>
+  <div class="muted" id="stats" style="margin-bottom:6px"></div>
+  <div class="scroll"><table><thead><tr><th>#</th><th>Time</th><th>User</th><th>Action</th><th>Outcome</th><th>Doc</th><th>Detail</th></tr></thead><tbody id="audit"></tbody></table></div>
+  <div class="muted" style="margin-top:8px">Admins can see this (real app: <code>/audit/</code>, admin-only). A download event proves the app served the file, not that anyone read it. Revocation cannot erase copies already downloaded.</div>
+</div>
+</main>
+
+<script>
+const ROLES={admin:'ADMIN',alice:'OWNER',bob:'VIEWER',carol:'OWNER'};
+let S;
+function init(){S={me:'alice',docs:[],audit:[],nextDoc:1,fails:{},share:null,clock:0};
+  addDoc('alice','Q3 Contract.pdf',true);}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+function ts(){S.clock+=7;const d=new Date(Date.UTC(2026,9,20,9,0,S.clock));return d.toISOString().slice(11,19)}
+function log(user,action,outcome,doc,detail){S.audit.unshift({n:S.audit.length+1,t:ts(),user:user||'—',action,outcome,doc:doc?'#'+doc.id+' '+doc.name:'',detail:detail||''})}
+function addDoc(owner,name,silent){const d={id:S.nextDoc++,owner,name,perms:{}};S.docs.push(d);if(!silent)log(owner,'UPLOAD','SUCCESS',d,'application/pdf');return d}
+// mirrors documents/permissions.py
+const LV={read:1,edit:2,owner:3};
+function level(user,d){if(!d||ROLES[user]==='ADMIN')return null;if(d.owner===user&&ROLES[user]==='OWNER')return 'owner';return d.perms[user]||null}
+function authorize(user,id,needed,action){
+  const d=S.docs.find(x=>x.id===id),lv=level(user,d);
+  if(!lv||LV[lv]<LV[needed]){log(user,action,'DENIED',d,lv?'insufficient permission':'no access or not found');return {status:lv?403:404}}
+  return {status:200,d,lv}}
+function res(kind,msg){const r=$('res');r.className='res '+kind;r.textContent=msg;return msg}
+function resFor(r,okMsg){return r.status===200?res('ok','200 OK – '+okMsg):res('bad',r.status+(r.status===404?' Not Found':' Forbidden')+' – denied and written to the audit trail.')}
+
+const A={
+ download(id){const r=authorize(S.me,id,'read','DOWNLOAD');if(r.status===200){log(S.me,'DOWNLOAD','SUCCESS',r.d,'application/pdf');}render();return resFor(r,'file streamed as attachment; event audited.')},
+ edit(id){const r=authorize(S.me,id,'edit','EDIT');if(r.status===200){r.d.name=r.d.name.replace(/( \(edited\))?$/,' (edited)');log(S.me,'EDIT','SUCCESS',r.d,'metadata');}render();return resFor(r,'metadata updated.')},
+ del(id){const r=authorize(S.me,id,'owner','DELETE');if(r.status===200){log(S.me,'DELETE','SUCCESS',r.d);S.docs=S.docs.filter(x=>x!==r.d);if(S.share===id)S.share=null}render();return resFor(r,'document deleted; audit history kept.')},
+ grant(id,user,lv){const r=authorize(S.me,id,'owner','GRANT');if(r.status===200){if(!user||ROLES[user]==='ADMIN'||user===r.d.owner){log(S.me,'GRANT','FAILURE',r.d,'invalid grant request');render();return res('bad','No eligible user with that name.')}r.d.perms[user]=lv;log(S.me,'GRANT','SUCCESS',r.d,'to '+user+': '+lv)}render();return resFor(r,'access granted to '+user+' ('+lv+').')},
+ revoke(id,user){const r=authorize(S.me,id,'owner','REVOKE');if(r.status===200){delete r.d.perms[user];log(S.me,'REVOKE','SUCCESS',r.d,'from '+user)}render();return resFor(r,'access revoked – '+user+'’s very next request will be denied.')}
+};
+function mine(){return S.docs.filter(d=>level(S.me,d))}
+function render(){
+  $('who').innerHTML=Object.keys(ROLES).map(u=>`<button class="who ${S.me===u?'on':''}" data-who="${u}">${u} · ${ROLES[u].toLowerCase()}</button>`).join('');
+  $('whoinfo').textContent={ADMIN:'Admin: manages users, sees the audit log and document metadata – never document contents.',OWNER:'Owner: uploads, shares and manages their own documents.',VIEWER:'Viewer: sees only documents explicitly shared with them.'}[ROLES[S.me]];
+  $('uploadbar').style.display=ROLES[S.me]==='OWNER'?'flex':'none';
+  $('adm').textContent='Open /audit/ dashboard';
+  $('doclist').innerHTML=mine().map(d=>{const lv=level(S.me,d);return `<tr><td>${d.id}</td><td>${esc(d.name)}</td><td>${d.owner}</td><td>${lv==='owner'?'Owner':lv==='edit'?'Read + Edit':'Read'}</td><td class="row" style="gap:4px"><button class="s" data-a="download" data-id="${d.id}">Download</button>${LV[lv]>=2?`<button class="s" data-a="edit" data-id="${d.id}">Edit</button>`:''}${lv==='owner'?`<button class="s" data-a="share" data-id="${d.id}">Share</button><button class="s d" data-a="del" data-id="${d.id}">Delete</button>`:''}</td></tr>`}).join('')||'<tr><td colspan="5" class="muted">No documents.</td></tr>';
+  const d=S.docs.find(x=>x.id===S.share);
+  $('sharebox').innerHTML=d&&level(S.me,d)==='owner'?`<h2>Sharing: ${esc(d.name)}</h2><div class="row"><select id="gu"><option>bob</option><option>carol</option><option>alice</option><option>admin</option></select><select id="gl"><option value="read">Read</option><option value="edit">Read + Edit</option></select><button class="p" id="go">Grant</button></div>
+   <table style="margin-top:8px"><tbody>${Object.entries(d.perms).map(([u,l])=>`<tr><td>${u}</td><td>${l}</td><td><button class="s d" data-rev="${u}" data-id="${d.id}">Revoke</button></td></tr>`).join('')||'<tr><td class="muted">Not shared with anyone.</td></tr>'}</tbody></table>`:'<h2>Sharing</h2><div class="muted">Select “Share” on one of your documents.</div>';
+  const c=k=>S.audit.filter(e=>e.action===k&&e.outcome==='SUCCESS').length;
+  $('stats').textContent=`Uploads ${c('UPLOAD')} · Downloads ${c('DOWNLOAD')} · Permission changes ${c('GRANT')+c('REVOKE')} · Denied ${S.audit.filter(e=>e.outcome==='DENIED').length}`;
+  $('audit').innerHTML=S.audit.slice(0,40).map(e=>`<tr class="${e.outcome==='DENIED'?'denied':''}"><td>${e.n}</td><td>${e.t}</td><td>${esc(e.user)}</td><td>${e.action}</td><td>${e.outcome}</td><td>${esc(e.doc)}</td><td>${esc(e.detail)}</td></tr>`).join('')||'<tr><td colspan="7" class="muted">No events yet.</td></tr>';
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.who){S.me=t.dataset.who;S.share=null;res('info','Now acting as '+S.me+'.');render()}
+  else if(t.dataset.a==='share'){S.share=+t.dataset.id;render()}
+  else if(t.dataset.a){A[t.dataset.a](+t.dataset.id)}
+  else if(t.dataset.poke){const id=+$('did').value,k=t.dataset.poke;
+    if(k==='download')A.download(id);else if(k==='edit')A.edit(id);else if(k==='delete')A.del(id);else A.grant(id,S.me,'edit')}
+  else if(t.id==='go'){A.grant(S.share,$('gu').value,$('gl').value)}
+  else if(t.dataset.rev){A.revoke(+t.dataset.id,t.dataset.rev)}
+  else if(t.id==='upload'){if(ROLES[S.me]!=='OWNER')return;const n=$('uname').value.trim()||'Untitled.pdf';addDoc(S.me,n);res('ok','Uploaded “'+n+'” – stored under a random server name.');render()}
+  else if(t.id==='adm'){if(ROLES[S.me]==='ADMIN'){log(S.me,'AUDIT_VIEW','SUCCESS');res('ok','200 OK – dashboard shown below (admin only).')}else{log(S.me,'ACCESS_DENIED','DENIED',null,'GET /audit/');res('bad','403 Forbidden – only Admins may open the audit dashboard; the attempt is logged.')}render()}
+  else if(t.id==='brute'){bruteforce()}
+  else if(t.id==='reset'){init();res('info','Demo reset.');render()}
+  else if(t.id==='guided'){guided()}
+});
+function bruteforce(){const u='bob';for(let i=0;i<5;i++){log(u,'LOGIN','FAILURE',null,'invalid credentials')}
+  log(u,'LOGIN','DENIED',null,'throttled – correct password now also refused for 15 min');res('bad','5 failures → further attempts for “bob” are blocked (even with the right password). Throttling is audited.');render()}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let running=false;
+async function guided(){if(running)return;running=true;init();render();
+  const step=async(who,cap,fn)=>{S.me=who;$('cap').textContent=cap;render();await sleep(900);const m=fn();render();await sleep(1600);return m};
+  await step('alice','1/8 Alice (Owner) uploads a PDF',()=>{addDoc('alice','Board Minutes.pdf');res('ok','Uploaded – random server-side filename.')});
+  await step('bob','2/8 Bob (Viewer) sees nothing – and guessing ID 1 fails',()=>A.download(1));
+  await step('alice','3/8 Alice grants Bob Read',()=>A.grant(1,'bob','read'));
+  await step('bob','4/8 Bob downloads – allowed and audited',()=>A.download(1));
+  await step('bob','5/8 Read-only Bob tries to edit → 403',()=>A.edit(1));
+  await step('alice','6/8 Alice revokes Bob',()=>A.revoke(1,'bob'));
+  await step('bob','7/8 Bob’s NEXT request → denied immediately',()=>A.download(1));
+  await step('admin','8/8 Admin reviews the trail: upload, grant, download, revoke, denials',()=>{log('admin','AUDIT_VIEW','SUCCESS');res('ok','Audit shows every step, denied rows highlighted. Admin cannot download the document itself.')});
+  $('cap').textContent='Guided demo complete – now try it yourself.';running=false}
+init();render();
+</script>
+</body>
+</html>

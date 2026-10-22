@@ -1,0 +1,515 @@
+
+{% extends "base.html" %}
+{% block title %}Audit Dashboard · TrustVault{% endblock %}
+
+{% block content %}
+<style>
+/* FULL HACKER THEME */
+body {
+    background: #020817 !important;
+}
+
+.tv-audit {
+    min-height: 100vh;
+    padding: 28px 20px;
+    color: #e6f2ff;
+    background:
+        radial-gradient(ellipse at top, #0a2040 0%, transparent 55%),
+        linear-gradient(135deg, #020817, #061326, #020817);
+    border-radius: 16px;
+}
+
+.tv-audit * {
+    box-sizing: border-box;
+}
+
+.tv-audit h1,
+.tv-audit h2,
+.tv-audit h3,
+.tv-audit p {
+    color: #e6f2ff;
+}
+
+.tv-eyebrow {
+    color: #00e5ff;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+.tv-heading {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 900;
+    margin: 10px 0;
+    text-shadow: 0 0 22px #008cff55;
+}
+
+.tv-subtitle {
+    color: #9bb8d8 !important;
+    margin-bottom: 28px;
+}
+
+.tv-monitor {
+    display: inline-block;
+    padding: 11px 16px;
+    color: #00e5ff;
+    background: #061b30;
+    border: 1px solid #008cff;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    box-shadow: 0 0 18px #008cff20;
+}
+
+.tv-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.tv-stats {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 30px;
+}
+
+.tv-stat {
+    min-width: 0;
+    padding: 22px 18px;
+    background: linear-gradient(145deg, #071a31, #030c1b);
+    border: 1px solid #075b91;
+    border-radius: 16px;
+    box-shadow: 0 0 20px #007bff0b;
+    transition: .2s ease;
+}
+
+.tv-stat:hover {
+    transform: translateY(-3px);
+    border-color: #00d9ff;
+    box-shadow: 0 0 22px #008cff20;
+}
+
+.tv-stat-label {
+    color: #8fcaff;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    overflow-wrap: anywhere;
+}
+
+.tv-stat-value {
+    color: #fff;
+    font-size: 34px;
+    font-weight: 900;
+    margin-top: 18px;
+}
+
+.tv-stat-line {
+    width: 48px;
+    height: 3px;
+    margin-top: 16px;
+    border-radius: 10px;
+    background: #00d9ff;
+    box-shadow: 0 0 12px #00d9ff;
+}
+
+.tv-panel {
+    background: rgba(3, 13, 29, .97);
+    border: 1px solid #075b91;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 28px;
+    box-shadow: 0 12px 35px #0005, 0 0 20px #007bff0b;
+}
+
+.tv-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 20px 24px;
+    background: #06162b;
+    border-bottom: 1px solid #164366;
+}
+
+.tv-panel-head h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0;
+}
+
+.tv-panel-head span {
+    color: #42c8ff;
+    font-size: 12px;
+}
+
+.tv-filter {
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr 1.35fr 1.1fr auto;
+    gap: 12px;
+    padding: 20px;
+    background: #030d1d;
+    border-bottom: 1px solid #102e4b;
+}
+
+.tv-audit input,
+.tv-audit select {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    padding: 11px 13px;
+    color: #e6f2ff !important;
+    background-color: #091a30 !important;
+    border: 1px solid #205077 !important;
+    border-radius: 10px !important;
+    outline: none;
+}
+
+.tv-audit input::placeholder {
+    color: #7797b9;
+}
+
+.tv-audit select option {
+    color: #e6f2ff;
+    background: #091a30;
+}
+
+.tv-audit input:focus,
+.tv-audit select:focus {
+    border-color: #00d9ff !important;
+    box-shadow: 0 0 0 3px #00d9ff17 !important;
+}
+
+.tv-btn {
+    min-height: 46px;
+    padding: 11px 20px;
+    color: #fff !important;
+    background: linear-gradient(135deg, #087cff, #009fe3);
+    border: 1px solid #00d9ff;
+    border-radius: 10px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.tv-btn:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 18px #008cff55;
+}
+
+.tv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.tv-table {
+    width: 100%;
+    min-width: 1000px;
+    margin: 0;
+    border-collapse: collapse;
+    color: #d7eaff !important;
+    background: #030b18 !important;
+}
+
+.tv-table thead th {
+    padding: 17px 18px;
+    color: #65c9ff !important;
+    background: #061831 !important;
+    border-bottom: 1px solid #075b91;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.tv-table tbody tr,
+.tv-table tbody td {
+    color: #d7eaff !important;
+    background: #030b18 !important;
+}
+
+.tv-table tbody td {
+    padding: 15px 18px;
+    border-bottom: 1px solid #132a43 !important;
+    vertical-align: middle;
+}
+
+.tv-table tbody tr:hover td {
+    background: #0a1c33 !important;
+}
+
+.tv-table tbody tr:last-child td {
+    border-bottom: 0 !important;
+}
+
+.tv-table .tv-denied td {
+    background: #24101c !important;
+    color: #ffb6c4 !important;
+}
+
+.tv-table .tv-denied:hover td {
+    background: #351324 !important;
+}
+
+.tv-badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    border: 1px solid #245477;
+    background: #0b2139;
+    color: #8ed8ff;
+}
+
+.tv-badge-denied {
+    color: #ff9bab;
+    border-color: #76324b;
+    background: #301321;
+}
+
+.tv-badge-success {
+    color: #60e8ad;
+    border-color: #246449;
+    background: #10291f;
+}
+
+.tv-empty {
+    padding: 35px !important;
+    text-align: center;
+    color: #82a3c8 !important;
+}
+
+.tv-empty-icon {
+    display: block;
+    color: #00d9ff;
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.tv-footer-note {
+    color: #7598bd !important;
+    font-size: 12px;
+    margin-top: 12px;
+}
+
+@media (max-width: 1100px) {
+    .tv-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .tv-filter {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .tv-audit {
+        padding: 18px 10px;
+    }
+
+    .tv-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .tv-stat {
+        padding: 16px 12px;
+    }
+
+    .tv-stat-value {
+        font-size: 28px;
+    }
+
+    .tv-filter {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+
+    .tv-panel-head {
+        padding: 16px;
+    }
+}
+</style>
+
+<div class="tv-audit">
+
+    <div class="tv-top">
+        <div>
+            <div class="tv-eyebrow">TrustVault / Security Center</div>
+            <h1 class="tv-heading">Audit Dashboard</h1>
+            <p class="tv-subtitle">
+                Monitor activity, security events and document access.
+            </p>
+        </div>
+        <div class="tv-monitor">◈ SECURITY MONITORING</div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="tv-stats">
+        {% for label, v in stats.items %}
+        <div class="tv-stat">
+            <div class="tv-stat-label">{{ label }}</div>
+            <div class="tv-stat-value">{{ v }}</div>
+            <div class="tv-stat-line"></div>
+            {% if label != "users" and label != "documents" %}
+            <small style="color:#7797b9;">Last 7 days</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Audit logs -->
+    <section class="tv-panel">
+        <div class="tv-panel-head">
+            <h2>◈ Security Audit Logs</h2>
+            <span>ACTIVITY MONITOR</span>
+        </div>
+
+        <form method="get" class="tv-filter">
+            <select name="action" aria-label="Filter by action">
+                <option value="">Any action</option>
+                {% for v, l in actions %}
+                <option value="{{ v }}"
+                    {% if v == f.action %}selected{% endif %}>
+                    {{ l }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select name="outcome" aria-label="Filter by outcome">
+                <option value="">Any outcome</option>
+                {% for v, l in outcomes %}
+                <option value="{{ v }}"
+                    {% if v == f.outcome %}selected{% endif %}>
+                    {{ l }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <input
+                name="user"
+                placeholder="Username"
+                value="{{ f.user }}"
+                aria-label="Username">
+
+            <input
+                name="document"
+                placeholder="Document ID"
+                value="{{ f.document }}"
+                aria-label="Document ID">
+
+            <button type="submit" class="tv-btn">Filter</button>
+        </form>
+
+        <div class="tv-table-wrap">
+            <table class="tv-table">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Outcome</th>
+                        <th>Document</th>
+                        <th>Detail</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in events %}
+                    <tr class="{% if e.outcome == 'DENIED' %}tv-denied{% endif %}">
+                        <td>{{ e.timestamp|date:"Y-m-d H:i:s" }}</td>
+                        <td>{{ e.actor_username|default:"—" }}</td>
+                        <td>{{ e.action }}</td>
+                        <td>
+                            {% if e.outcome == "DENIED" %}
+                            <span class="tv-badge tv-badge-denied">
+                                {{ e.outcome }}
+                            </span>
+                            {% elif e.outcome == "SUCCESS" %}
+                            <span class="tv-badge tv-badge-success">
+                                {{ e.outcome }}
+                            </span>
+                            {% else %}
+                            <span class="tv-badge">{{ e.outcome }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if e.document_id %}
+                                #{{ e.document_id }} {{ e.document_name }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ e.detail|default:"—" }}</td>
+                        <td>{{ e.ip_address|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="tv-empty">
+                            <span class="tv-empty-icon">◇</span>
+                            No audit events found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Recent documents -->
+    <section class="tv-panel">
+        <div class="tv-panel-head">
+            <h2>◈ Recent Documents</h2>
+            <span>METADATA ONLY</span>
+        </div>
+
+        <div class="tv-table-wrap">
+            <table class="tv-table">
+                <thead>
+                    <tr>
+                        <th>Document ID</th>
+                        <th>Name</th>
+                        <th>Owner</th>
+                        <th>File Size</th>
+                        <th>Uploaded</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for d in documents %}
+                    <tr>
+                        <td>#{{ d.pk }}</td>
+                        <td>{{ d.name }}</td>
+                        <td>{{ d.owner.username }}</td>
+                        <td>{{ d.size|filesizeformat }}</td>
+                        <td>{{ d.uploaded_at|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="tv-empty">
+                            <span class="tv-empty-icon">◇</span>
+                            No documents found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <p class="tv-footer-note">
+        TRUSTVAULT SECURITY SYSTEM · AUDIT RECORDS · ACCESS MONITORING
+    </p>
+
+</div>
+{% endblock %}
+```

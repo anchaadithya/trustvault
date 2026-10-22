@@ -1,0 +1,463 @@
+
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}TrustVault | Documents{% endblock %}
+
+{% block content %}
+<style>
+html, body {
+    min-height: 100vh !important;
+    background: #050b16 !important;
+    color: #eaf4ff !important;
+}
+
+.tv-docs,
+.tv-docs * {
+    box-sizing: border-box;
+}
+
+.tv-docs {
+    --cyan: #19c9ff;
+    --muted: #8ea4c1;
+    max-width: 1450px;
+    min-height: 85vh;
+    margin: 0 auto;
+    padding: 30px 20px;
+    color: #eaf4ff !important;
+}
+
+.tv-docs h1,
+.tv-docs h2,
+.tv-docs h3,
+.tv-docs p,
+.tv-docs label,
+.tv-docs th,
+.tv-docs td {
+    color: inherit;
+}
+
+.tv-eyebrow {
+    color: var(--cyan) !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.tv-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin-bottom: 28px;
+}
+
+.tv-heading h1 {
+    font-size: clamp(27px, 4vw, 38px);
+    font-weight: 850;
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+}
+
+.tv-heading h1 span {
+    color: var(--cyan);
+}
+
+.tv-subtitle {
+    color: var(--muted) !important;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.tv-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 43px;
+    padding: 11px 17px;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    background: #091a31 !important;
+    color: #a9dfff !important;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.tv-btn:hover {
+    border-color: var(--cyan);
+    color: #fff !important;
+}
+
+.tv-btn-primary {
+    border-color: var(--cyan);
+    background: linear-gradient(135deg, #087cff, #00aeca) !important;
+    color: #fff !important;
+}
+
+.tv-panel {
+    margin-bottom: 23px;
+    padding: clamp(18px, 3vw, 26px);
+    border: 1px solid rgba(25, 201, 255, .23);
+    border-radius: 16px;
+    background:
+        radial-gradient(ellipse at 100% 0%,
+        rgba(0, 153, 255, .08), transparent 45%),
+        linear-gradient(135deg, #0b1526, #071121) !important;
+    box-shadow: 0 0 23px rgba(0, 153, 255, .05);
+}
+
+.tv-panel h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.tv-panel-description {
+    color: var(--muted) !important;
+    font-size: 12px;
+    line-height: 1.8;
+    margin-bottom: 20px;
+}
+
+.tv-filter-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 15px;
+}
+
+.tv-field {
+    min-width: 0;
+}
+
+.tv-field label {
+    display: block;
+    color: #9edcff !important;
+    font-size: 12px;
+    font-weight: 750;
+    margin-bottom: 8px;
+}
+
+.tv-field input,
+.tv-field select,
+.tv-field textarea {
+    width: 100%;
+    min-height: 43px;
+    padding: 11px 12px;
+    border: 1px solid #244665 !important;
+    border-radius: 8px;
+    outline: none;
+    background-color: #050d1b !important;
+    color: #eaf4ff !important;
+    -webkit-text-fill-color: #eaf4ff !important;
+    color-scheme: dark;
+    font-size: 13px;
+    box-shadow: none !important;
+}
+
+.tv-field input:focus,
+.tv-field select:focus {
+    border-color: var(--cyan) !important;
+    box-shadow: 0 0 0 3px rgba(25, 201, 255, .08) !important;
+}
+
+.tv-field input::placeholder {
+    color: #637c99 !important;
+    -webkit-text-fill-color: #637c99 !important;
+}
+
+.tv-field select option {
+    background: #071121 !important;
+    color: #eaf4ff !important;
+}
+
+.tv-field input:-webkit-autofill,
+.tv-field input:-webkit-autofill:hover,
+.tv-field input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #eaf4ff !important;
+    -webkit-box-shadow: 0 0 0 1000px #050d1b inset !important;
+}
+
+.tv-filter-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 19px;
+}
+
+.tv-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid #17334e;
+    border-radius: 11px;
+}
+
+.tv-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+    background: #071121 !important;
+}
+
+.tv-table thead {
+    background: #0d2036 !important;
+}
+
+.tv-table th {
+    padding: 15px 14px;
+    color: #72ddff !important;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #214360;
+    white-space: nowrap;
+}
+
+.tv-table td {
+    padding: 15px 14px;
+    color: #d4e6fa !important;
+    font-size: 12px;
+    border-bottom: 1px solid rgba(80, 130, 175, .13);
+    overflow-wrap: anywhere;
+}
+
+.tv-table tbody tr {
+    background: #071121 !important;
+    transition: background .2s;
+}
+
+.tv-table tbody tr:nth-child(even) {
+    background: #091729 !important;
+}
+
+.tv-table tbody tr:hover {
+    background: #10243a !important;
+}
+
+.tv-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.tv-doc-name {
+    color: #63ddff !important;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+}
+
+.tv-doc-name:hover {
+    color: #fff !important;
+}
+
+.tv-category {
+    display: inline-block;
+    padding: 5px 9px;
+    border: 1px solid rgba(25, 201, 255, .23);
+    border-radius: 20px;
+    background: rgba(25, 201, 255, .06) !important;
+    color: #80dfff !important;
+    font-size: 10px;
+    font-weight: 750;
+}
+
+.tv-empty {
+    padding: 35px 15px !important;
+    color: #8ea4c1 !important;
+    text-align: center;
+}
+
+.tv-messages {
+    margin-bottom: 18px;
+}
+
+.tv-message {
+    padding: 13px 15px;
+    margin-bottom: 9px;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    background: #091a31 !important;
+    color: #a9dfff !important;
+    font-size: 13px;
+}
+
+.tv-docs form {
+    margin-bottom: 0;
+}
+
+@media(max-width: 850px) {
+    .tv-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media(max-width: 560px) {
+    .tv-docs {
+        padding: 22px 11px;
+    }
+
+    .tv-heading {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .tv-heading > .tv-btn {
+        width: 100%;
+    }
+
+    .tv-filter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-filter-actions {
+        flex-direction: column;
+    }
+
+    .tv-filter-actions .tv-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="tv-docs">
+
+    <div class="tv-eyebrow">TRUSTVAULT / SECURE STORAGE</div>
+
+    <div class="tv-heading">
+        <div>
+            <h1>Document <span>Vault</span></h1>
+            <p class="tv-subtitle">
+                Explore documents and manage access through secure permissions.
+            </p>
+        </div>
+
+        {% if user.role == "OWNER" %}
+            <a href="{% url 'document_upload' %}"
+               class="tv-btn tv-btn-primary">
+                + Upload Document
+            </a>
+        {% endif %}
+    </div>
+
+    {% if messages %}
+        <div class="tv-messages">
+            {% for message in messages %}
+                <div class="tv-message">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="tv-panel">
+        <h2>⌕ Search & Filter Documents</h2>
+        <p class="tv-panel-description">
+            Find documents by name, uploader, category or upload date.
+        </p>
+
+        <form method="get">
+            <div class="tv-filter-grid">
+
+                {% for field in form %}
+                    <div class="tv-field">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.errors %}
+                            <div style="color:#ff9cab;font-size:11px;margin-top:6px;">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+            </div>
+
+            <div class="tv-filter-actions">
+                <button type="submit" class="tv-btn tv-btn-primary">
+                    ⌕ Apply Filters
+                </button>
+
+                <a href="{% url 'documents' %}" class="tv-btn">
+                    ↻ Clear Filters
+                </a>
+            </div>
+        </form>
+    </section>
+
+    <section class="tv-panel">
+        <h2>▤ Documents</h2>
+        <p class="tv-panel-description">
+            Select a document to view its details and available access options.
+        </p>
+
+        <div class="tv-table-wrap">
+            <table class="tv-table">
+                <thead>
+                    <tr>
+                        <th>Document</th>
+                        <th>Uploader</th>
+                        <th>Category</th>
+                        <th>File Name</th>
+                        <th>Uploaded</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for document in documents %}
+                        <tr>
+                            <td>
+                                <a class="tv-doc-name"
+                                   href="{% url 'document_detail' document.pk %}">
+                                    {{ document.name }}
+                                </a>
+                            </td>
+
+                            <td>{{ document.owner.username }}</td>
+
+                            <td>
+                                <span class="tv-category">
+                                    {{ document.category|default:"General" }}
+                                </span>
+                            </td>
+
+                            <td>{{ document.original_filename }}</td>
+
+                            <td>
+                                {{ document.uploaded_at|date:"d M Y, H:i" }}
+                            </td>
+
+                            <td>
+                                <a class="tv-btn"
+                                   href="{% url 'document_detail' document.pk %}">
+                                    View Details →
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="tv-empty">
+                                <h3 style="color:#63ddff;margin-bottom:9px;">
+                                    No Documents Found
+                                </h3>
+                                No documents match your current filters.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div style="text-align:center;color:#526984;font-size:10px;margin-top:24px;">
+        TRUSTVAULT · SECURE DOCUMENT WORKSPACE
+    </div>
+
+</div>
+{% endblock %}

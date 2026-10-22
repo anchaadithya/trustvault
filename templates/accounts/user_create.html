@@ -1,0 +1,318 @@
+
+{% extends "base.html" %}
+
+{% block title %}Add New User · TrustVault{% endblock %}
+
+{% block content %}
+<style>
+/* TrustVault dark hacker theme */
+html, body {
+    background: #050b16 !important;
+    color: #eaf4ff !important;
+}
+
+.user-create-page,
+.user-create-page * {
+    box-sizing: border-box;
+}
+
+.user-create-page {
+    --cyan: #19c9ff;
+    --muted: #8ea4c1;
+    max-width: 1000px;
+    min-height: 85vh;
+    margin: 0 auto;
+    padding: 30px 20px;
+    color: #eaf4ff !important;
+}
+
+.user-create-page h1,
+.user-create-page h2,
+.user-create-page p,
+.user-create-page label {
+    color: inherit;
+}
+
+.uc-eyebrow {
+    color: #19c9ff !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-bottom: 12px;
+}
+
+.uc-title {
+    font-size: clamp(27px, 4vw, 38px);
+    font-weight: 850;
+    margin-bottom: 12px;
+    overflow-wrap: anywhere;
+}
+
+.uc-title span {
+    color: #19c9ff;
+}
+
+.uc-subtitle {
+    color: #8ea4c1 !important;
+    font-size: 14px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+}
+
+.uc-panel {
+    padding: clamp(20px, 4vw, 32px);
+    background:
+        radial-gradient(ellipse at 100% 0%,
+        rgba(0, 153, 255, .09), transparent 45%),
+        linear-gradient(135deg, #0b1526, #071121) !important;
+    border: 1px solid rgba(25, 201, 255, .25);
+    border-radius: 17px;
+    box-shadow: 0 0 25px rgba(0, 153, 255, .07);
+}
+
+.uc-panel h2 {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.uc-panel-description {
+    color: #8ea4c1 !important;
+    font-size: 12px;
+    margin-bottom: 25px;
+}
+
+.uc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.uc-field {
+    min-width: 0;
+}
+
+.uc-field label {
+    display: block;
+    color: #9edcff !important;
+    font-size: 12px;
+    font-weight: 750;
+    margin-bottom: 9px;
+}
+
+.uc-field input,
+.uc-field select,
+.uc-field textarea {
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 14px;
+    border: 1px solid #244665 !important;
+    border-radius: 9px;
+    outline: none;
+    background-color: #050d1b !important;
+    color: #eaf4ff !important;
+    -webkit-text-fill-color: #eaf4ff !important;
+    color-scheme: dark;
+    font: inherit;
+    font-size: 13px;
+    box-shadow: none !important;
+}
+
+.uc-field input:focus,
+.uc-field select:focus,
+.uc-field textarea:focus {
+    border-color: #19c9ff !important;
+    box-shadow: 0 0 0 3px rgba(25, 201, 255, .09) !important;
+}
+
+.uc-field input::placeholder,
+.uc-field textarea::placeholder {
+    color: #637c99 !important;
+    -webkit-text-fill-color: #637c99 !important;
+}
+
+.uc-field select option {
+    background: #071121 !important;
+    color: #eaf4ff !important;
+}
+
+.uc-field input:-webkit-autofill,
+.uc-field input:-webkit-autofill:hover,
+.uc-field input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #eaf4ff !important;
+    -webkit-box-shadow: 0 0 0 1000px #050d1b inset !important;
+    transition: background-color 9999s ease-in-out 0s;
+}
+
+.uc-help {
+    color: #7189a6 !important;
+    font-size: 11px;
+    line-height: 1.7;
+    margin-top: 7px;
+}
+
+.uc-errors,
+.uc-errorlist {
+    color: #ff9cab !important;
+    font-size: 12px;
+    margin-top: 8px;
+    list-style: none;
+}
+
+.uc-errors {
+    padding: 13px 15px;
+    margin-bottom: 20px;
+    background: rgba(255, 65, 100, .07) !important;
+    border: 1px solid rgba(255, 90, 120, .3);
+    border-radius: 9px;
+}
+
+.uc-errors ul,
+.uc-errorlist li {
+    color: #ff9cab !important;
+}
+
+.uc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 28px;
+}
+
+.uc-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 19px;
+    border: 1px solid #245b85;
+    border-radius: 9px;
+    background: #091a31 !important;
+    color: #a9dfff !important;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.uc-btn-primary {
+    color: #fff !important;
+    border-color: #19c9ff !important;
+    background: linear-gradient(135deg, #087cff, #00aeca) !important;
+}
+
+.uc-btn:hover {
+    border-color: #19c9ff !important;
+    filter: brightness(1.12);
+}
+
+.uc-security-note {
+    margin-top: 22px;
+    padding: 14px 16px;
+    border: 1px solid rgba(25, 201, 255, .18);
+    border-radius: 10px;
+    background: rgba(25, 201, 255, .04) !important;
+    color: #8ea4c1 !important;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.uc-security-note strong {
+    color: #19c9ff !important;
+}
+
+@media (max-width: 650px) {
+    .user-create-page {
+        padding: 22px 12px;
+    }
+
+    .uc-grid {
+        grid-template-columns: 1fr;
+        gap: 17px;
+    }
+
+    .uc-actions {
+        flex-direction: column;
+    }
+
+    .uc-actions .uc-btn {
+        width: 100%;
+    }
+}
+</style>
+
+<div class="user-create-page">
+    <div class="uc-eyebrow">TRUSTVAULT / USER MANAGEMENT</div>
+
+    <h1 class="uc-title">Add New <span>User</span></h1>
+
+    <p class="uc-subtitle">
+        Create a new account and configure its access role
+        inside your secure workspace.
+    </p>
+
+    <section class="uc-panel">
+        <h2>◇ Account Configuration</h2>
+
+        <p class="uc-panel-description">
+            Enter the account details below.
+        </p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="uc-errors">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        {% if form.non_field_errors %}
+            <div class="uc-errors">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="uc-grid">
+                {% for field in form %}
+                    <div class="uc-field">
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="uc-help">
+                                {{ field.help_text|safe }}
+                            </div>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <div class="uc-errorlist">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="uc-actions">
+                <button type="submit" class="uc-btn uc-btn-primary">
+                    + Create User
+                </button>
+
+                <a href="{% url 'user_list' %}" class="uc-btn">
+                    ← Back to Users
+                </a>
+            </div>
+        </form>
+
+        <div class="uc-security-note">
+            <strong>SECURITY NOTICE</strong><br>
+            Assign the appropriate role to each account.
+            Document access must follow TrustVault permission rules.
+        </div>
+    </section>
+</div>
+{% endblock %}
