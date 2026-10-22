@@ -24,8 +24,11 @@ from .forms import (
 from .models import Role, User
 
 
-@login_required
 def home(request):
+    """Show login to anonymous visitors; dashboard to authenticated users."""
+    if not request.user.is_authenticated:
+        return redirect("login")
+
     since = timezone.now() - timedelta(days=7)
 
     context = {
@@ -235,12 +238,7 @@ def change_username(request, pk):
 @role_required(Role.ADMIN)
 @require_POST
 def delete_user(request, pk):
-    """
-    Permanently delete the selected user account.
-
-    AuditEvent has no foreign key to User, so existing audit events
-    remain in the database after the account is deleted.
-    """
+    """Permanently delete a user while retaining independent audit events."""
     with transaction.atomic():
         target = User.objects.select_for_update().filter(pk=pk).first()
 
@@ -286,7 +284,6 @@ def delete_user(request, pk):
         old_username = target.username
         user_id = target.pk
 
-        # Write the audit event before deleting the account.
         record(
             request,
             AuditAction.USER_MANAGE,
@@ -343,7 +340,7 @@ def reset_user_password(request, pk):
 
 
 class ThrottledLoginView(LoginView):
-    """Blocks repeated login failures within a configured time window."""
+    """Block repeated login failures within a configured time window."""
 
     def post(self, request, *args, **kwargs):
         username = request.POST.get("username", "")[:150]
@@ -366,7 +363,7 @@ class ThrottledLoginView(LoginView):
         )
 
         too_many_ip_failures = (
-            ip
+            bool(ip)
             and fails.filter(ip_address=ip).count()
             >= settings.LOGIN_MAX_FAILURES_PER_IP
         )
