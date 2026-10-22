@@ -1,4 +1,4 @@
-
+﻿
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -273,7 +273,7 @@
         }
 
         .welcome::after {
-            content: "⌬";
+            content: "âŒ¬";
             position: absolute;
             right: 30px;
             top: -48px;
@@ -576,7 +576,7 @@
     <aside class="sidebar">
 
         <a href="{% url 'home' %}" class="brand">
-            <div class="brand-icon">⬡</div>
+            <div class="brand-icon">â¬¡</div>
             <div>
                 <div class="brand-name">Trust<span>Vault</span></div>
                 <div class="brand-caption">SECURE WORKSPACE</div>
@@ -587,36 +587,36 @@
 
         <nav>
             <a href="{% url 'home' %}" class="nav-link active">
-                <span class="nav-icon">⌂</span>
+                <span class="nav-icon">âŒ‚</span>
                 Dashboard
             </a>
 
             {% if user.role == "ADMIN" %}
 
                 <a href="{% url 'user_list' %}" class="nav-link">
-                    <span class="nav-icon">♙</span>
+                    <span class="nav-icon">â™™</span>
                     User Management
                 </a>
 
-                <a href="{% url 'audit:dashboard' %}" class="nav-link">
-                    <span class="nav-icon">⌁</span>
+                <a href="{% url 'audit:audit_dashboard' %}" class="nav-link">
+                    <span class="nav-icon">âŒ</span>
                     Audit Dashboard
                 </a>
 
                 <a href="{% url 'documents' %}" class="nav-link">
-                    <span class="nav-icon">▤</span>
+                    <span class="nav-icon">â–¤</span>
                     Documents
                 </a>
 
             {% elif user.role == "OWNER" %}
 
                 <a href="{% url 'documents' %}" class="nav-link">
-                    <span class="nav-icon">▤</span>
+                    <span class="nav-icon">â–¤</span>
                     My Documents
                 </a>
 
                 <a href="{% url 'download_requests' %}" class="nav-link">
-                    <span class="nav-icon">⇩</span>
+                    <span class="nav-icon">â‡©</span>
                     <span>Download Access Requests</span>
 
                     {% if owner_pending_request_count %}
@@ -629,7 +629,7 @@
             {% elif user.is_authenticated %}
 
                 <a href="{% url 'documents' %}" class="nav-link">
-                    <span class="nav-icon">▤</span>
+                    <span class="nav-icon">â–¤</span>
                     Shared Documents
                 </a>
 
@@ -646,7 +646,7 @@
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
                     <button type="submit" class="logout">
-                        ↪ &nbsp; Log out
+                        â†ª &nbsp; Log out
                     </button>
                 </form>
             </div>
@@ -683,7 +683,7 @@
             </p>
 
             <span class="role-pill">
-                ◈ &nbsp; {{ user.get_role_display }}
+                â—ˆ &nbsp; {{ user.get_role_display }}
             </span>
         </section>
 
@@ -697,14 +697,14 @@
             <article class="stat-card">
                 <div class="stat-top">
                     <div class="stat-label">DOCUMENTS</div>
-                    <div class="stat-icon">▤</div>
+                    <div class="stat-icon">â–¤</div>
                 </div>
 
                 <div class="stat-value">
                     {% if documents_count != None %}
                         {{ documents_count }}
                     {% else %}
-                        —
+                        â€”
                     {% endif %}
                 </div>
 
@@ -718,14 +718,14 @@
                 <article class="stat-card">
                     <div class="stat-top">
                         <div class="stat-label">USER ACCOUNTS</div>
-                        <div class="stat-icon">♙</div>
+                        <div class="stat-icon">â™™</div>
                     </div>
 
                     <div class="stat-value">
                         {% if users_count != None %}
                             {{ users_count }}
                         {% else %}
-                            —
+                            â€”
                         {% endif %}
                     </div>
 
@@ -739,7 +739,7 @@
                 <article class="stat-card">
                     <div class="stat-top">
                         <div class="stat-label">ACCOUNT ROLE</div>
-                        <div class="stat-icon">◈</div>
+                        <div class="stat-icon">â—ˆ</div>
                     </div>
 
                     <div class="stat-value" style="font-size:19px;">
@@ -756,7 +756,7 @@
             <article class="stat-card">
                 <div class="stat-top">
                     <div class="stat-label">RECENT EVENTS</div>
-                    <div class="stat-icon">⌁</div>
+                    <div class="stat-icon">âŒ</div>
                 </div>
 
                 <div class="stat-value">
@@ -785,7 +785,7 @@
                 {% for activity in recent_activity %}
 
                     <div class="activity-item">
-                        <div class="activity-icon">⌁</div>
+                        <div class="activity-icon">âŒ</div>
 
                         <div>
                             <div class="activity-title">
@@ -833,37 +833,37 @@
                 {% if user.role == "ADMIN" %}
 
                     <a href="{% url 'user_list' %}" class="quick-link">
-                        <span>♙ &nbsp; Manage Users</span>
-                        <span>→</span>
+                        <span>â™™ &nbsp; Manage Users</span>
+                        <span>â†’</span>
                     </a>
 
-                    <a href="{% url 'audit:dashboard' %}" class="quick-link">
-                        <span>⌁ &nbsp; Audit Dashboard</span>
-                        <span>→</span>
+                    <a href="{% url 'audit:audit_dashboard' %}" class="quick-link">
+                        <span>âŒ &nbsp; Audit Dashboard</span>
+                        <span>â†’</span>
                     </a>
 
                     <a href="{% url 'documents' %}" class="quick-link">
-                        <span>▤ &nbsp; All Documents</span>
-                        <span>→</span>
+                        <span>â–¤ &nbsp; All Documents</span>
+                        <span>â†’</span>
                     </a>
 
                 {% elif user.role == "OWNER" %}
 
                     <a href="{% url 'documents' %}" class="quick-link">
-                        <span>▤ &nbsp; Manage Documents</span>
-                        <span>→</span>
+                        <span>â–¤ &nbsp; Manage Documents</span>
+                        <span>â†’</span>
                     </a>
 
                     <a href="{% url 'download_requests' %}" class="quick-link">
-                        <span>⇩ &nbsp; Download Access Requests</span>
-                        <span>→</span>
+                        <span>â‡© &nbsp; Download Access Requests</span>
+                        <span>â†’</span>
                     </a>
 
                 {% else %}
 
                     <a href="{% url 'documents' %}" class="quick-link">
-                        <span>◉ &nbsp; Shared Documents</span>
-                        <span>→</span>
+                        <span>â—‰ &nbsp; Shared Documents</span>
+                        <span>â†’</span>
                     </a>
 
                 {% endif %}
@@ -872,7 +872,7 @@
         </section>
 
         <div class="footer">
-            TRUSTVAULT · SECURE DOCUMENT WORKSPACE
+            TRUSTVAULT Â· SECURE DOCUMENT WORKSPACE
         </div>
 
     </main>

@@ -1,4 +1,4 @@
-
+﻿
 <!doctype html>
 <html lang="en">
 <head>
@@ -295,7 +295,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'audit:dashboard' %}">
+                    <a class="nav-link" href="{% url 'audit:audit_dashboard' %}">
                         Audit Dashboard
                     </a>
                 </li>
@@ -346,7 +346,7 @@
                 <span class="tv-user">
                     {{ user.username }}
                     <span class="tv-role">
-                        · {{ user.get_role_display }}
+                        Â· {{ user.get_role_display }}
                     </span>
                 </span>
 
@@ -387,7 +387,7 @@
 
 <footer class="tv-footer">
     <div class="container">
-        TrustVault · Secure Document Management
+        TrustVault Â· Secure Document Management
     </div>
 </footer>
 
@@ -395,3 +395,4 @@
 
 </body>
 </html>
+

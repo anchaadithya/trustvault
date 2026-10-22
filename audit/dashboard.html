@@ -1,7 +1,7 @@
-
+﻿
 {% extends "base.html" %}
 
-{% block title %}Activity Monitoring · TrustVault{% endblock %}
+{% block title %}Activity Monitoring Â· TrustVault{% endblock %}
 
 {% block content %}
 <style>
@@ -145,19 +145,19 @@
             <strong>{{ stats.documents }}</strong>
         </div>
         <div class="audit-stat">
-            <span>Uploads · 7 days</span>
+            <span>Uploads Â· 7 days</span>
             <strong>{{ stats.uploads }}</strong>
         </div>
         <div class="audit-stat">
-            <span>Downloads · 7 days</span>
+            <span>Downloads Â· 7 days</span>
             <strong>{{ stats.downloads }}</strong>
         </div>
         <div class="audit-stat">
-            <span>Permission Changes · 7 days</span>
+            <span>Permission Changes Â· 7 days</span>
             <strong>{{ stats.permission_changes }}</strong>
         </div>
         <div class="audit-stat">
-            <span>Denied · 7 days</span>
+            <span>Denied Â· 7 days</span>
             <strong>{{ stats.denied }}</strong>
         </div>
     </section>
@@ -202,7 +202,7 @@
             </div>
 
             <button class="audit-btn" type="submit">Apply Filters</button>
-            <a class="audit-btn secondary" href="{% url 'audit:dashboard' %}">Clear</a>
+            <a class="audit-btn secondary" href="{% url 'audit:audit_dashboard' %}">Clear</a>
         </form>
     </section>
 
@@ -249,11 +249,11 @@
                                 {{ event.document_name|default:"Document" }}
                                 <div class="audit-muted">ID: {{ event.document_id }}</div>
                             {% else %}
-                                <span class="audit-muted">—</span>
+                                <span class="audit-muted">â€”</span>
                             {% endif %}
                         </td>
-                        <td>{{ event.detail|default:"—" }}</td>
-                        <td>{{ event.ip_address|default:"—" }}</td>
+                        <td>{{ event.detail|default:"â€”" }}</td>
+                        <td>{{ event.ip_address|default:"â€”" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -270,7 +270,7 @@
         <div class="audit-pagination">
             <span class="audit-muted">
                 Page {{ page_obj.number }} of {{ paginator.num_pages|default:"1" }}
-                · {{ paginator.count }} matching records
+                Â· {{ paginator.count }} matching records
             </span>
 
             <div class="audit-pagination-links">
@@ -301,3 +301,4 @@
     </section>
 </div>
 {% endblock %}
+
