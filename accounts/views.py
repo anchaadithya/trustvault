@@ -16,7 +16,11 @@ from audit.services import record
 from documents.models import Document
 
 from .decorators import role_required
-from .forms import RoleChangeForm, UserCreateForm, AdminPasswordResetForm
+from .forms import (
+    RoleChangeForm,
+    UserCreateForm,
+    AdminPasswordResetForm,
+)
 from .models import Role, User
 
 
@@ -46,18 +50,14 @@ def home(request):
 @login_required
 @role_required(Role.ADMIN)
 def user_list(request):
-    # Get search and role filter values from the URL.
     search_query = request.GET.get("q", "").strip()
     selected_role = request.GET.get("role", "").strip()
 
-    # Start with all users.
     users = User.objects.all().order_by("username")
 
-    # Search by username, ignoring uppercase/lowercase differences.
     if search_query:
         users = users.filter(username__icontains=search_query)
 
-    # Apply the role filter only if a valid role was selected.
     valid_roles = [value for value, label in Role.choices]
 
     if selected_role in valid_roles:
@@ -75,6 +75,7 @@ def user_list(request):
     return render(request, "accounts/user_list.html", context)
 
 
+@login_required
 @role_required(Role.ADMIN)
 @require_POST
 def change_role(request, pk):
@@ -113,6 +114,7 @@ def change_role(request, pk):
     return redirect("user_list")
 
 
+@login_required
 @role_required(Role.ADMIN)
 def user_create(request):
     form = UserCreateForm(request.POST or None)
@@ -148,6 +150,7 @@ def user_create(request):
     )
 
 
+@login_required
 @role_required(Role.ADMIN)
 @require_POST
 def toggle_active(request, pk):
@@ -184,6 +187,7 @@ def toggle_active(request, pk):
     return redirect("user_list")
 
 
+@login_required
 @role_required(Role.ADMIN)
 @require_POST
 def change_username(request, pk):
@@ -227,17 +231,18 @@ def change_username(request, pk):
     return redirect("user_list")
 
 
+@login_required
 @role_required(Role.ADMIN)
 @require_POST
 def delete_user(request, pk):
     """
-    Deactivate and anonymize the account while preserving
-    documents and audit history linked to that user.
+    Permanently delete the selected user account.
+
+    AuditEvent has no foreign key to User, so existing audit events
+    remain in the database after the account is deleted.
     """
     with transaction.atomic():
-        target = User.objects.select_for_update().filter(
-            pk=pk
-        ).first()
+        target = User.objects.select_for_update().filter(pk=pk).first()
 
         if target is None:
             messages.error(request, "User not found.")
@@ -281,32 +286,27 @@ def delete_user(request, pk):
         old_username = target.username
         user_id = target.pk
 
-        target.is_active = False
-        target.username = f"removed_user_{user_id}"
-        target.email = ""
-
-        target.save(
-            update_fields=["is_active", "username", "email"]
-        )
-
+        # Write the audit event before deleting the account.
         record(
             request,
             AuditAction.USER_MANAGE,
             Outcome.SUCCESS,
             detail=(
-                f"admin deactivated and anonymized user ID {user_id}; "
+                f"admin permanently deleted user ID {user_id}; "
                 f"previous username: {old_username}"
             ),
         )
 
+        target.delete()
+
     messages.success(
         request,
-        f"Account {old_username} has been removed from active use. "
-        "Related documents and audit history were preserved.",
+        f"Account {old_username} was permanently deleted.",
     )
     return redirect("user_list")
 
 
+@login_required
 @role_required(Role.ADMIN)
 def reset_user_password(request, pk):
     target = get_object_or_404(User, pk=pk)
