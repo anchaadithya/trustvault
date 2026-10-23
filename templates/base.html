@@ -2,9 +2,9 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#101a35">
+    <meta name="theme-color" content="#071426">
 
     <title>{% block title %}TrustVault{% endblock %}</title>
 
@@ -15,24 +15,30 @@
 
     <style>
         :root {
-            --tv-primary: #3157d5;
-            --tv-primary-dark: #2444b5;
-            --tv-navy: #101a35;
-            --tv-background: #f4f7fc;
-            --tv-text: #1c2742;
-            --tv-muted: #77829a;
-            --tv-border: #e5eaf3;
+            --tv-primary: #00d9ff;
+            --tv-primary-dark: #00a8d1;
+            --tv-navy: #071426;
+            --tv-background: #050b16;
+            --tv-text: #eaf6ff;
+            --tv-muted: #9db4ca;
+            --tv-border: rgba(0, 217, 255, 0.20);
+            --tv-panel: #0a1729;
         }
 
         * {
             box-sizing: border-box;
         }
 
+        html,
+        body {
+            min-height: 100%;
+        }
+
         body {
             margin: 0;
-            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            min-height: 100vh;
             background: var(--tv-background);
             color: var(--tv-text);
             font-family: Inter, "Segoe UI", Arial, sans-serif;
@@ -40,9 +46,10 @@
         }
 
         .tv-navbar {
-            background: var(--tv-navy);
+            background: #071221;
             padding: 15px 0;
-            box-shadow: 0 4px 18px rgba(16, 26, 53, 0.12);
+            border-bottom: 1px solid var(--tv-border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
         }
 
         .tv-brand {
@@ -57,7 +64,7 @@
         }
 
         .tv-brand:hover {
-            color: #dce6ff;
+            color: var(--tv-primary);
         }
 
         .tv-logo {
@@ -67,9 +74,10 @@
             align-items: center;
             justify-content: center;
             border-radius: 12px;
-            background: var(--tv-primary);
-            color: white;
-            font-size: 1.25rem;
+            background: rgba(0, 217, 255, 0.10);
+            border: 1px solid var(--tv-primary);
+            color: var(--tv-primary);
+            font-size: 1.15rem;
             font-weight: 800;
         }
 
@@ -78,7 +86,7 @@
         }
 
         .tv-navbar .nav-link {
-            color: #c4cce0;
+            color: #c4d5e8;
             padding: 10px 14px;
             border-radius: 9px;
             font-size: 0.94rem;
@@ -88,8 +96,8 @@
 
         .tv-navbar .nav-link:hover,
         .tv-navbar .nav-link:focus {
-            background: rgba(255, 255, 255, 0.09);
-            color: #fff;
+            background: rgba(0, 217, 255, 0.10);
+            color: var(--tv-primary);
         }
 
         .tv-user {
@@ -99,22 +107,22 @@
         }
 
         .tv-role {
-            color: #aebfe9;
+            color: #9db4ca;
         }
 
         .tv-logout {
-            border: 1px solid #596782;
+            border: 1px solid #3b5873;
             border-radius: 9px;
             padding: 8px 15px;
-            color: #fff;
+            color: #eaf6ff;
+            background: transparent;
             font-weight: 600;
-            transition: all 0.2s ease;
         }
 
         .tv-logout:hover {
-            background: #fff;
-            color: var(--tv-navy);
-            border-color: #fff;
+            background: var(--tv-primary);
+            color: #03111c;
+            border-color: var(--tv-primary);
         }
 
         .tv-main {
@@ -131,24 +139,29 @@
         }
 
         .btn-primary {
-            background: var(--tv-primary);
-            border-color: var(--tv-primary);
+            background: var(--tv-primary-dark);
+            border-color: var(--tv-primary-dark);
+            color: #fff;
         }
 
         .btn-primary:hover,
         .btn-primary:focus {
-            background: var(--tv-primary-dark);
-            border-color: var(--tv-primary-dark);
+            background: var(--tv-primary);
+            border-color: var(--tv-primary);
+            color: #03111c;
         }
 
         .card {
+            background: var(--tv-panel);
+            color: var(--tv-text);
             border: 1px solid var(--tv-border);
             border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(25, 43, 84, 0.04);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
         }
 
         .card-header {
-            background: #fff;
+            background: rgba(0, 217, 255, 0.05);
+            color: #fff;
             border-bottom: 1px solid var(--tv-border);
             padding: 16px 20px;
             font-weight: 700;
@@ -167,25 +180,41 @@
         .form-control,
         .form-select {
             min-height: 44px;
-            border: 1px solid #dce3ef;
+            background: #071426;
+            border: 1px solid #294158;
             border-radius: 9px;
             color: var(--tv-text);
         }
 
+        .form-control::placeholder {
+            color: #849bb1;
+        }
+
         .form-control:focus,
         .form-select:focus {
-            border-color: #7793f2;
-            box-shadow: 0 0 0 3px rgba(49, 87, 213, 0.12);
+            background: #071426;
+            color: var(--tv-text);
+            border-color: var(--tv-primary);
+            box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.12);
+        }
+
+        .form-select option {
+            background: #071426;
+            color: var(--tv-text);
         }
 
         .table {
             --bs-table-bg: transparent;
+            --bs-table-color: #d9e8f5;
+            --bs-table-border-color: var(--tv-border);
+            --bs-table-hover-bg: rgba(0, 217, 255, 0.05);
+            --bs-table-hover-color: #fff;
             vertical-align: middle;
         }
 
         .table thead th {
-            background: #f5f7fc;
-            color: var(--tv-muted);
+            background: rgba(0, 217, 255, 0.07);
+            color: var(--tv-primary);
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -200,9 +229,33 @@
         }
 
         .alert {
-            border: 0;
+            border: 1px solid var(--tv-border);
             border-radius: 11px;
             padding: 14px 18px;
+        }
+
+        .alert-success {
+            color: #a5ffd6;
+            background: #08251e;
+        }
+
+        .alert-danger {
+            color: #ffb8c1;
+            background: #2a111a;
+        }
+
+        .alert-warning {
+            color: #ffe3a3;
+            background: #2b2110;
+        }
+
+        .alert-info {
+            color: #a5efff;
+            background: #092334;
+        }
+
+        .btn-close {
+            filter: invert(1);
         }
 
         a {
@@ -211,7 +264,7 @@
 
         .tv-footer {
             border-top: 1px solid var(--tv-border);
-            background: #fff;
+            background: #071221;
             color: var(--tv-muted);
             text-align: center;
             padding: 17px 12px;
@@ -285,12 +338,11 @@
 
         <ul class="navbar-nav me-auto ms-md-4">
 
-            {# ADMIN NAVIGATION: No Download Access Requests link #}
             {% if user.is_authenticated and user.role == "ADMIN" %}
 
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'user_list' %}">
-                        Users
+                        User Management
                     </a>
                 </li>
 
@@ -306,7 +358,6 @@
                     </a>
                 </li>
 
-            {# OWNER NAVIGATION: Download Access Requests link appears here #}
             {% elif user.is_authenticated and user.role == "OWNER" %}
 
                 <li class="nav-item">
@@ -327,7 +378,6 @@
                     </a>
                 </li>
 
-            {# OTHER AUTHENTICATED USERS #}
             {% elif user.is_authenticated %}
 
                 <li class="nav-item">
@@ -346,7 +396,7 @@
                 <span class="tv-user">
                     {{ user.username }}
                     <span class="tv-role">
-                        Â· {{ user.get_role_display }}
+                        | {{ user.get_role_display }}
                     </span>
                 </span>
 
@@ -387,7 +437,7 @@
 
 <footer class="tv-footer">
     <div class="container">
-        TrustVault Â· Secure Document Management
+        TrustVault - Secure Document Management
     </div>
 </footer>
 
@@ -395,4 +445,3 @@
 
 </body>
 </html>
-

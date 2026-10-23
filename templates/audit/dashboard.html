@@ -1,674 +1,748 @@
 
 {% extends "base.html" %}
-{% load tz %}
+{% load static %}
 
-{% block title %}Audit Dashboard · TrustVault{% endblock %}
+{% block title %}Audit Dashboard | TrustVault{% endblock %}
 
 {% block content %}
+
 <style>
-:root {
-    --tv-bg: #050b16;
-    --tv-panel: #0b1527;
-    --tv-panel-2: #101e33;
-    --tv-border: #20344e;
-    --tv-text: #eaf4ff;
-    --tv-muted: #91a8c2;
-    --tv-cyan: #19c9ff;
-    --tv-green: #3ee6a8;
-    --tv-red: #ff637d;
-    --tv-yellow: #ffd166;
+/* ==========================================
+   TRUSTVAULT AUDIT DASHBOARD
+   Dark hacker theme
+========================================== */
+
+html,
+body {
+    min-height: 100%;
+    background-color: #030914 !important;
+    color: #eaf6ff !important;
 }
 
-.audit-page, .audit-page * { box-sizing: border-box; }
+body:has(.audit-page) {
+    background-color: #030914 !important;
+    background-image:
+        linear-gradient(
+            rgba(2, 8, 20, 0.45),
+            rgba(2, 8, 20, 0.60)
+        ),
+        url("{% static 'images/trustvault-hacker-bg.png' %}") !important;
+    background-position: center center !important;
+    background-size: cover !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+}
+
+.audit-page,
+.audit-page * {
+    box-sizing: border-box;
+}
 
 .audit-page {
-    width: 100%;
+    --cyan: #00d9ff;
+    --cyan-light: #9beeff;
+    --panel: rgba(3, 12, 27, 0.82);
+    --border: rgba(0, 217, 255, 0.25);
+    --muted: #9db4ca;
+
     min-height: 100vh;
-    padding: 24px;
-    background: var(--tv-bg);
-    color: var(--tv-text);
-    border-radius: 16px;
-    font-family: Inter, "Segoe UI", Arial, sans-serif;
+    padding: 28px 18px 45px;
+    color: #eaf6ff !important;
+    background: transparent !important;
 }
 
-.audit-page h1, .audit-page h2, .audit-page h3,
-.audit-page p { margin-top: 0; }
+.audit-page h1,
+.audit-page h2,
+.audit-page h3,
+.audit-page p,
+.audit-page label,
+.audit-page strong,
+.audit-page td,
+.audit-page th {
+    color: inherit;
+}
+
+.audit-container {
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+/* Header */
 
 .audit-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: flex-start;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 18px;
+    padding: 23px 25px;
     margin-bottom: 26px;
+    background: var(--panel) !important;
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(0, 217, 255, 0.07);
 }
 
-.audit-eyebrow {
-    color: var(--tv-cyan);
+.audit-brand {
+    color: var(--cyan) !important;
     font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    margin-bottom: 10px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    margin-bottom: 9px;
 }
 
 .audit-title {
-    font-size: clamp(26px, 4vw, 36px);
-    font-weight: 800;
-    margin-bottom: 8px;
-    overflow-wrap: anywhere;
+    margin: 0;
+    color: #fff !important;
+    font-size: clamp(25px, 4vw, 36px);
+    font-weight: 900;
 }
 
 .audit-subtitle {
-    color: var(--tv-muted);
-    font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 0;
+    margin-top: 9px;
+    color: #b0c5d9 !important;
+    font-size: 13px;
+    line-height: 1.7;
 }
 
-.audit-clock {
-    min-width: 250px;
-    padding: 18px 20px;
-    background: linear-gradient(145deg, #0d1b30, #081221);
-    border: 1px solid var(--tv-border);
-    border-radius: 14px;
-    box-shadow: 0 0 24px rgba(25, 201, 255, .05);
-}
-
-.clock-label {
+.audit-header-actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.audit-btn {
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-    gap: 8px;
-    color: var(--tv-muted);
-    font-size: 11px;
+    padding: 11px 16px;
+    color: var(--cyan-light) !important;
+    background: rgba(0, 217, 255, 0.07) !important;
+    border: 1px solid rgba(0, 217, 255, 0.4);
+    border-radius: 8px;
+    text-decoration: none !important;
+    font-family: inherit;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
+    cursor: pointer;
+    transition: 0.2s ease;
 }
 
-.clock-dot {
-    width: 8px;
-    height: 8px;
-    display: inline-block;
-    background: var(--tv-green);
-    border-radius: 50%;
-    box-shadow: 0 0 10px var(--tv-green);
-    animation: tv-pulse 1.5s infinite;
+.audit-btn:hover {
+    color: #03111c !important;
+    background: var(--cyan) !important;
+    border-color: var(--cyan);
 }
 
-.clock-time {
-    color: var(--tv-cyan);
-    font-size: 27px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
+/* Section headings */
+
+.audit-section-heading {
+    margin: 29px 0 15px;
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 1px;
 }
 
-.clock-date {
-    color: var(--tv-text);
-    font-size: 13px;
-    margin-top: 8px;
-    line-height: 1.5;
+.audit-section-heading span {
+    color: var(--cyan) !important;
 }
 
-.clock-zone {
-    color: var(--tv-muted);
-    font-size: 11px;
-    margin-top: 6px;
-}
-
-@keyframes tv-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: .35; }
-}
-
-.audit-panel {
-    padding: 22px;
-    margin-bottom: 22px;
-    background: var(--tv-panel);
-    border: 1px solid var(--tv-border);
-    border-radius: 14px;
-    min-width: 0;
-}
-
-.audit-section-title {
-    font-size: 18px;
-    font-weight: 750;
-    margin-bottom: 6px;
-    overflow-wrap: anywhere;
-}
-
-.audit-section-description {
-    color: var(--tv-muted);
-    font-size: 13px;
-    line-height: 1.6;
-    margin-bottom: 18px;
-}
+/* Statistics */
 
 .audit-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 15px;
-    margin-bottom: 24px;
 }
 
 .audit-stat {
     min-width: 0;
-    padding: 20px;
-    background: var(--tv-panel);
-    border: 1px solid var(--tv-border);
-    border-radius: 13px;
-    position: relative;
-    overflow: hidden;
+    padding: 21px 19px;
+    background: var(--panel) !important;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    transition: 0.2s ease;
 }
 
-.audit-stat::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background: var(--tv-cyan);
+.audit-stat:hover {
+    border-color: var(--cyan);
+    transform: translateY(-2px);
 }
 
 .audit-stat-label {
-    color: var(--tv-muted);
-    font-size: 12px;
-    font-weight: 700;
+    color: #b1c6d9 !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    letter-spacing: .8px;
-    overflow-wrap: anywhere;
 }
 
 .audit-stat-value {
-    color: var(--tv-text);
-    font-size: 30px;
-    font-weight: 850;
-    margin-top: 12px;
+    margin-top: 13px;
+    color: var(--cyan) !important;
+    font-size: clamp(25px, 3vw, 34px);
+    font-weight: 900;
     overflow-wrap: anywhere;
 }
 
-.audit-stat:nth-child(2)::before { background: var(--tv-green); }
-.audit-stat:nth-child(3)::before { background: var(--tv-yellow); }
-.audit-stat:nth-child(4)::before { background: var(--tv-red); }
+.audit-stat-note {
+    margin-top: 8px;
+    color: #8ba5bd !important;
+    font-size: 11px;
+}
+
+/* Panels */
+
+.audit-panel {
+    margin-top: 17px;
+    padding: 22px;
+    background: var(--panel) !important;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.audit-panel-title {
+    margin: 0 0 18px;
+    color: #fff !important;
+    font-size: 16px;
+    font-weight: 900;
+}
+
+.audit-panel-title span {
+    color: var(--cyan) !important;
+}
+
+/* Filters */
 
 .audit-filters {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 14px;
     align-items: end;
 }
 
 .audit-field label {
     display: block;
-    color: var(--tv-muted);
-    font-size: 12px;
-    font-weight: 700;
     margin-bottom: 8px;
+    color: #b9cde0 !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
 }
 
-.audit-page input, .audit-page select {
+.audit-field input,
+.audit-field select {
     width: 100%;
     min-width: 0;
-    min-height: 43px;
-    padding: 10px 12px;
-    background: #07101e !important;
-    color: var(--tv-text) !important;
-    border: 1px solid var(--tv-border) !important;
+    padding: 12px 11px;
+    color: #eaf6ff !important;
+    background: rgba(1, 7, 17, 0.92) !important;
+    border: 1px solid rgba(0, 217, 255, 0.28);
     border-radius: 8px;
     outline: none;
-    font: inherit;
+    font-family: inherit;
     font-size: 13px;
-    color-scheme: dark;
 }
 
-.audit-page input:focus, .audit-page select:focus {
-    border-color: var(--tv-cyan) !important;
-    box-shadow: 0 0 0 2px rgba(25, 201, 255, .1);
+.audit-field input::placeholder {
+    color: #8099b1 !important;
 }
 
-.audit-actions {
+.audit-field input:focus,
+.audit-field select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 2px rgba(0, 217, 255, 0.1);
+}
+
+.audit-field select option {
+    color: #eaf6ff;
+    background: #071426;
+}
+
+.audit-filter-actions {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-    margin-top: 16px;
+    margin-top: 18px;
 }
 
-.audit-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 42px;
-    padding: 10px 16px;
-    border: 1px solid var(--tv-cyan);
-    border-radius: 8px;
-    background: var(--tv-cyan);
-    color: #03101b !important;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none !important;
-    cursor: pointer;
-    transition: .2s ease;
-}
-
-.audit-btn:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-}
-
-.audit-btn-secondary {
-    background: transparent;
-    color: var(--tv-cyan) !important;
-}
+/* Table */
 
 .audit-table-wrap {
     width: 100%;
     overflow-x: auto;
-    border: 1px solid var(--tv-border);
-    border-radius: 10px;
+    border: 1px solid rgba(0, 217, 255, 0.15);
+    border-radius: 9px;
 }
 
 .audit-table {
     width: 100%;
-    min-width: 900px;
+    min-width: 1050px;
     border-collapse: collapse;
-    text-align: left;
+    background: rgba(2, 9, 20, 0.45) !important;
+}
+
+.audit-table thead {
+    background: rgba(0, 217, 255, 0.09) !important;
 }
 
 .audit-table th {
-    padding: 14px 13px;
-    background: var(--tv-panel-2);
-    color: var(--tv-cyan);
-    font-size: 11px;
-    font-weight: 800;
+    padding: 15px 13px;
+    color: var(--cyan-light) !important;
+    font-size: 10px;
+    font-weight: 900;
+    text-align: left;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
-    letter-spacing: .7px;
     white-space: nowrap;
+    border-bottom: 1px solid var(--border);
 }
 
 .audit-table td {
     padding: 14px 13px;
-    border-top: 1px solid var(--tv-border);
-    color: var(--tv-text);
+    color: #d9e8f5 !important;
     font-size: 12px;
     line-height: 1.6;
     vertical-align: top;
     overflow-wrap: anywhere;
+    border-bottom: 1px solid rgba(148, 185, 220, 0.1);
 }
 
 .audit-table tbody tr:hover {
-    background: rgba(25, 201, 255, .035);
+    background: rgba(0, 217, 255, 0.055) !important;
 }
 
-.audit-muted { color: var(--tv-muted) !important; }
+.audit-table tbody tr:last-child td {
+    border-bottom: none;
+}
 
-.audit-badge {
+.audit-muted {
+    color: #8fa8bf !important;
+}
+
+.audit-detail {
+    max-width: 300px;
+}
+
+/* Status labels */
+
+.audit-status {
     display: inline-block;
-    padding: 5px 8px;
-    border: 1px solid var(--tv-border);
-    border-radius: 6px;
+    padding: 5px 9px;
+    border-radius: 20px;
     font-size: 10px;
-    font-weight: 800;
-    letter-spacing: .4px;
+    font-weight: 900;
     white-space: nowrap;
+    border: 1px solid transparent;
 }
 
-.badge-success {
-    color: var(--tv-green);
-    border-color: rgba(62, 230, 168, .3);
-    background: rgba(62, 230, 168, .07);
+.audit-success {
+    color: #63ffc0 !important;
+    background: rgba(0, 255, 153, 0.08) !important;
+    border-color: rgba(0, 255, 153, 0.25);
 }
 
-.badge-denied, .badge-failure {
-    color: var(--tv-red);
-    border-color: rgba(255, 99, 125, .3);
-    background: rgba(255, 99, 125, .07);
+.audit-denied {
+    color: #ff8b9b !important;
+    background: rgba(255, 60, 90, 0.09) !important;
+    border-color: rgba(255, 60, 90, 0.25);
 }
 
-.badge-other {
-    color: var(--tv-yellow);
-    border-color: rgba(255, 209, 102, .3);
-    background: rgba(255, 209, 102, .07);
+.audit-failure {
+    color: #ffd17d !important;
+    background: rgba(255, 185, 50, 0.09) !important;
+    border-color: rgba(255, 185, 50, 0.25);
 }
+
+.audit-neutral {
+    color: var(--cyan-light) !important;
+    background: rgba(0, 217, 255, 0.07) !important;
+    border-color: rgba(0, 217, 255, 0.2);
+}
+
+/* Empty state */
 
 .audit-empty {
-    padding: 32px 16px !important;
+    padding: 42px 20px !important;
     text-align: center;
-    color: var(--tv-muted) !important;
+    color: #9bb3c9 !important;
 }
 
-.audit-bottom-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
+.audit-empty strong {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--cyan) !important;
+    font-size: 16px;
 }
 
-.audit-bottom-grid .audit-panel { min-width: 0; }
+/* Pagination */
 
-.audit-mini-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.audit-mini-list li {
+.audit-pagination {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 13px 0;
-    border-bottom: 1px solid var(--tv-border);
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 20px;
+    color: #a9bfd4 !important;
     font-size: 12px;
-    line-height: 1.6;
 }
 
-.audit-mini-list li:last-child { border-bottom: 0; }
-.audit-mini-list strong { overflow-wrap: anywhere; }
-
-.audit-mini-list span {
-    color: var(--tv-muted);
-    text-align: right;
-    overflow-wrap: anywhere;
+.audit-pagination-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-.audit-footer-note {
-    color: var(--tv-muted);
+.audit-page-link {
+    display: inline-block;
+    min-width: 36px;
+    padding: 9px 12px;
+    color: var(--cyan-light) !important;
+    text-align: center;
+    text-decoration: none !important;
+    background: rgba(0, 217, 255, 0.06) !important;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+}
+
+.audit-page-link.active,
+.audit-page-link:hover {
+    color: #03111c !important;
+    background: var(--cyan) !important;
+}
+
+.audit-page-link.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Footer */
+
+.audit-footer {
+    margin-top: 23px;
+    color: #8ca6bf !important;
+    text-align: center;
     font-size: 11px;
-    line-height: 1.7;
-    margin-top: 16px;
+    letter-spacing: 1px;
 }
 
-@media (max-width: 760px) {
-    .audit-page { padding: 14px; }
-    .audit-clock { width: 100%; min-width: 0; }
-    .audit-bottom-grid { grid-template-columns: 1fr; }
-    .audit-panel { padding: 16px; }
-    .audit-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .audit-stat { padding: 15px; }
-    .audit-stat-value { font-size: 25px; }
+/* Responsive */
+
+@media (max-width: 1050px) {
+    .audit-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audit-filters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
-@media (max-width: 400px) {
-    .audit-stats { grid-template-columns: 1fr; }
+@media (max-width: 600px) {
+    .audit-page {
+        padding: 15px 10px 30px;
+    }
+
+    .audit-header {
+        padding: 17px;
+    }
+
+    .audit-stats,
+    .audit-filters {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-panel {
+        padding: 14px;
+    }
+
+    .audit-header-actions {
+        width: 100%;
+    }
+
+    .audit-header-actions .audit-btn {
+        flex: 1;
+    }
 }
 </style>
 
 <div class="audit-page">
-    <header class="audit-header">
-        <div>
-            <div class="audit-eyebrow">TrustVault / Security Monitoring</div>
-            <h1 class="audit-title">Audit Dashboard</h1>
-            <p class="audit-subtitle">
-                Monitor recorded activity, access decisions and document operations.
-            </p>
-        </div>
+    <div class="audit-container">
 
-        <div class="audit-clock" aria-label="Live India date and time">
-            <div class="clock-label">
-                <span class="clock-dot"></span>
-                LIVE SYSTEM CLOCK
-            </div>
-            <div id="tv-live-time" class="clock-time">Loading time...</div>
-            <div id="tv-live-date" class="clock-date">Loading date...</div>
-            <div class="clock-zone">India Standard Time · IST (UTC+05:30)</div>
-        </div>
-    </header>
-
-    <section class="audit-stats" aria-label="Audit summary">
-        {% for label, value in stats.items %}
-            <div class="audit-stat">
-                <div class="audit-stat-label">{{ label }}</div>
-                <div class="audit-stat-value">{{ value }}</div>
-            </div>
-        {% empty %}
-            <div class="audit-stat">
-                <div class="audit-stat-label">Audit Events</div>
-                <div class="audit-stat-value">{{ events|length }}</div>
-            </div>
-        {% endfor %}
-    </section>
-
-    <section class="audit-panel">
-        <h2 class="audit-section-title">Filter Activity</h2>
-        <p class="audit-section-description">
-            Filter recorded audit events. The live clock updates independently.
-        </p>
-
-        <form method="get">
-            <div class="audit-filters">
-                <div class="audit-field">
-                    <label for="audit-action">Action</label>
-                    <select name="action" id="audit-action">
-                        <option value="">All actions</option>
-                        {% for value, label in actions %}
-                            <option value="{{ value }}" {% if request.GET.action == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="audit-field">
-                    <label for="audit-outcome">Outcome</label>
-                    <select name="outcome" id="audit-outcome">
-                        <option value="">All outcomes</option>
-                        {% for value, label in outcomes %}
-                            <option value="{{ value }}" {% if request.GET.outcome == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div class="audit-field">
-                    <label for="audit-search">Search</label>
-                    <input
-                        type="text"
-                        name="f"
-                        id="audit-search"
-                        value="{{ request.GET.f|default:'' }}"
-                        placeholder="User, document or details"
-                    >
+        <!-- HEADER -->
+        <header class="audit-header">
+            <div>
+                <div class="audit-brand">TRUSTVAULT / SECURITY CENTER</div>
+                <h1 class="audit-title">Activity Monitoring</h1>
+                <div class="audit-subtitle">
+                    Monitor security events, document activity and access attempts.
                 </div>
             </div>
 
-            <div class="audit-actions">
-                <button class="audit-btn" type="submit">Apply Filters</button>
-                <a class="audit-btn audit-btn-secondary" href="{% url 'audit:audit_dashboard' %}">
-                    Clear Filters
+            <div class="audit-header-actions">
+                <a class="audit-btn"
+                   href="{% url 'audit:audit_dashboard' %}">
+                    ↻ Refresh
+                </a>
+
+                <a class="audit-btn" href="{% url 'home' %}">
+                    ← Dashboard
                 </a>
             </div>
-        </form>
-    </section>
+        </header>
 
-    <section class="audit-panel">
-        <h2 class="audit-section-title">Activity Log</h2>
-        <p class="audit-section-description">
-            Audit event timestamps are displayed in India Standard Time (IST).
-        </p>
+        <!-- STATISTICS -->
+        <h2 class="audit-section-heading">
+            <span>//</span> SECURITY OVERVIEW
+        </h2>
 
-        <div class="audit-table-wrap">
-            <table class="audit-table">
-                <thead>
-                    <tr>
-                        <th>Time (IST)</th>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Outcome</th>
-                        <th>Document</th>
-                        <th>Details</th>
-                        <th>IP Address</th>
-                    </tr>
-                </thead>
+        <section class="audit-stats">
+            <div class="audit-stat">
+                <div class="audit-stat-label">Total Audit Events</div>
+                <div class="audit-stat-value">{{ stats.total_audit_events|default:0 }}</div>
+                <div class="audit-stat-note">Recorded activity</div>
+            </div>
 
-                <tbody>
-                    {% for event in events %}
-                        <tr>
-                            <td>
-                                {% if event.timestamp %}
-                                    {{ event.timestamp|localtime|date:"d-m-Y h:i:s A" }}
-                                {% else %}
-                                    <span class="audit-muted">—</span>
-                                {% endif %}
-                            </td>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Registered Users</div>
+                <div class="audit-stat-value">{{ stats.users|default:0 }}</div>
+                <div class="audit-stat-note">Platform accounts</div>
+            </div>
 
-                            <td>
-                                {% if event.actor_username %}
-                                    {{ event.actor_username }}
-                                {% else %}
-                                    <span class="audit-muted">Unknown user</span>
-                                {% endif %}
-                                <div class="audit-muted">
-                                    ID: {{ event.actor_id|default:"—" }}
-                                </div>
-                            </td>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Stored Documents</div>
+                <div class="audit-stat-value">{{ stats.documents|default:0 }}</div>
+                <div class="audit-stat-note">Managed documents</div>
+            </div>
 
-                            <td>
-                                <span class="audit-badge badge-other">
-                                    {{ event.action|default:"UNKNOWN" }}
-                                </span>
-                            </td>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Uploads</div>
+                <div class="audit-stat-value">{{ stats.uploads|default:0 }}</div>
+                <div class="audit-stat-note">Upload events</div>
+            </div>
 
-                            <td>
-                                {% if event.outcome == "SUCCESS" %}
-                                    <span class="audit-badge badge-success">{{ event.outcome }}</span>
-                                {% elif event.outcome == "DENIED" or event.outcome == "FAILURE" %}
-                                    <span class="audit-badge badge-denied">{{ event.outcome }}</span>
-                                {% else %}
-                                    <span class="audit-badge badge-other">
-                                        {{ event.outcome|default:"UNKNOWN" }}
-                                    </span>
-                                {% endif %}
-                            </td>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Downloads</div>
+                <div class="audit-stat-value">{{ stats.downloads|default:0 }}</div>
+                <div class="audit-stat-note">Download events</div>
+            </div>
 
-                            <td>
-                                {% if event.document_name %}
-                                    {{ event.document_name }}
-                                {% elif event.document_id %}
-                                    Document #{{ event.document_id }}
-                                {% else %}
-                                    <span class="audit-muted">—</span>
-                                {% endif %}
-                            </td>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Permission Changes</div>
+                <div class="audit-stat-value">{{ stats.permission_changes|default:0 }}</div>
+                <div class="audit-stat-note">Grant and revoke events</div>
+            </div>
 
-                            <td>{{ event.detail|default:"—" }}</td>
-                            <td>{{ event.ip_address|default:"—" }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="7" class="audit-empty">
-                                No audit events found for these filters.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <p class="audit-footer-note">
-            The live clock shows the current browser time in IST.
-            Audit timestamps show when each event was recorded, converted to IST for display.
-        </p>
-    </section>
-
-    <div class="audit-bottom-grid">
-        <section class="audit-panel">
-            <h2 class="audit-section-title">Recent Documents</h2>
-            <p class="audit-section-description">
-                Recently uploaded or updated documents available in this dashboard's context.
-            </p>
-
-            <ul class="audit-mini-list">
-                {% for document in recent_documents %}
-                    <li>
-                        <strong>
-                            {{ document.name|default:document.original_filename|default:"Untitled document" }}
-                        </strong>
-                        <span>
-                            {% if document.uploaded_at %}
-                                {{ document.uploaded_at|localtime|date:"d M Y, h:i A" }}
-                            {% else %}
-                                Document
-                            {% endif %}
-                        </span>
-                    </li>
-                {% empty %}
-                    <li><span>No recent documents to display.</span></li>
-                {% endfor %}
-            </ul>
-        </section>
-
-        <section class="audit-panel">
-            <h2 class="audit-section-title">Monitoring Status</h2>
-            <p class="audit-section-description">Quick information about this dashboard.</p>
-
-            <ul class="audit-mini-list">
-                <li>
-                    <strong>Live clock</strong>
-                    <span>Browser-updated every second</span>
-                </li>
-                <li>
-                    <strong>Displayed timezone</strong>
-                    <span>Asia/Kolkata (IST)</span>
-                </li>
-                <li>
-                    <strong>Audit records</strong>
-                    <span>Loaded when the page is requested</span>
-                </li>
-                <li>
-                    <strong>Activity refresh</strong>
-                    <span>Reload the page to fetch newer events</span>
-                </li>
-            </ul>
-
-            <div class="audit-actions">
-                <button
-                    type="button"
-                    class="audit-btn audit-btn-secondary"
-                    onclick="window.location.reload()"
-                >
-                    Refresh Activity
-                </button>
+            <div class="audit-stat">
+                <div class="audit-stat-label">Denied Events</div>
+                <div class="audit-stat-value">{{ stats.denied|default:0 }}</div>
+                <div class="audit-stat-note">Blocked access events</div>
             </div>
         </section>
+
+        <!-- FILTERS -->
+        <h2 class="audit-section-heading">
+            <span>//</span> SEARCH &amp; FILTER
+        </h2>
+
+        <section class="audit-panel">
+            <h3 class="audit-panel-title">
+                Filter <span>Audit Records</span>
+            </h3>
+
+            <form method="get" action="{% url 'audit:audit_dashboard' %}">
+                <div class="audit-filters">
+                    <div class="audit-field">
+                        <label for="audit-action">Action</label>
+                        <select id="audit-action" name="action">
+                            <option value="">All actions</option>
+                            {% for value, label in actions %}
+                                <option value="{{ value }}" {% if f.action == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="audit-field">
+                        <label for="audit-outcome">Outcome</label>
+                        <select id="audit-outcome" name="outcome">
+                            <option value="">All outcomes</option>
+                            {% for value, label in outcomes %}
+                                <option value="{{ value }}" {% if f.outcome == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="audit-field">
+                        <label for="audit-user">Username</label>
+                        <input id="audit-user"
+                               type="text"
+                               name="user"
+                               value="{{ f.user|default:'' }}"
+                               placeholder="Search username">
+                    </div>
+
+                    <div class="audit-field">
+                        <label for="audit-document">Document ID / Name</label>
+                        <input id="audit-document"
+                               type="text"
+                               name="document"
+                               value="{{ f.document|default:'' }}"
+                               placeholder="Search document">
+                    </div>
+                </div>
+
+                <div class="audit-filter-actions">
+                    <button type="submit" class="audit-btn">
+                        ⌕ Apply Filters
+                    </button>
+
+                    <a class="audit-btn" href="{% url 'audit:audit_dashboard' %}">
+                        ✕ Clear Filters
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- ACTIVITY TABLE -->
+        <h2 class="audit-section-heading">
+            <span>//</span> ACTIVITY LOG
+        </h2>
+
+        <section class="audit-panel">
+            <h3 class="audit-panel-title">
+                Recorded <span>Security Events</span>
+            </h3>
+
+            <div class="audit-table-wrap">
+                <table class="audit-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Actor</th>
+                            <th>Action</th>
+                            <th>Outcome</th>
+                            <th>Document</th>
+                            <th>Details</th>
+                            <th>IP Address</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for event in events %}
+                            <tr>
+                                <td>
+                                    {% if event.timestamp %}
+                                        {{ event.timestamp|date:"Y-m-d H:i:s" }}
+                                    {% else %}
+                                        <span class="audit-muted">—</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <strong>{{ event.actor_username|default:"System" }}</strong>
+                                    {% if event.actor_id %}
+                                        <br>
+                                        <span class="audit-muted">ID: {{ event.actor_id }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <span class="audit-status audit-neutral">
+                                        {{ event.get_action_display|default:event.action }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    {% if event.outcome == "SUCCESS" %}
+                                        <span class="audit-status audit-success">SUCCESS</span>
+                                    {% elif event.outcome == "DENIED" %}
+                                        <span class="audit-status audit-denied">DENIED</span>
+                                    {% elif event.outcome == "FAILURE" %}
+                                        <span class="audit-status audit-failure">FAILURE</span>
+                                    {% else %}
+                                        <span class="audit-status audit-neutral">
+                                            {{ event.get_outcome_display|default:event.outcome }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if event.document_id %}
+                                        <strong>ID: {{ event.document_id }}</strong>
+                                        {% if event.document_name %}
+                                            <br>
+                                            <span class="audit-muted">{{ event.document_name }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="audit-muted">—</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="audit-detail">{{ event.detail|default:"—" }}</td>
+                                <td>{{ event.ip_address|default:"—" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="7" class="audit-empty">
+                                    <strong>No audit events found</strong>
+                                    No records match the selected filters.
+                                    Try clearing the filters.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- PAGINATION -->
+            {% if page_obj %}
+                <div class="audit-pagination">
+                    <div>
+                        Page {{ page_obj.number }}
+                        of {{ page_obj.paginator.num_pages }}
+                        · {{ page_obj.paginator.count }} records
+                    </div>
+
+                    <div class="audit-pagination-links">
+                        {% if page_obj.has_previous %}
+                            <a class="audit-page-link"
+                               href="?{% if request.GET.action %}action={{ request.GET.action|urlencode }}&amp;{% endif %}{% if request.GET.outcome %}outcome={{ request.GET.outcome|urlencode }}&amp;{% endif %}{% if request.GET.user %}user={{ request.GET.user|urlencode }}&amp;{% endif %}{% if request.GET.document %}document={{ request.GET.document|urlencode }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                                ← Previous
+                            </a>
+                        {% else %}
+                            <span class="audit-page-link disabled">← Previous</span>
+                        {% endif %}
+
+                        {% if page_obj.has_next %}
+                            <a class="audit-page-link"
+                               href="?{% if request.GET.action %}action={{ request.GET.action|urlencode }}&amp;{% endif %}{% if request.GET.outcome %}outcome={{ request.GET.outcome|urlencode }}&amp;{% endif %}{% if request.GET.user %}user={{ request.GET.user|urlencode }}&amp;{% endif %}{% if request.GET.document %}document={{ request.GET.document|urlencode }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                                Next →
+                            </a>
+                        {% else %}
+                            <span class="audit-page-link disabled">Next →</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        <footer class="audit-footer">
+            TRUSTVAULT · SECURITY ACTIVITY MONITORING
+        </footer>
+
     </div>
 </div>
 
-<script>
-(function () {
-    "use strict";
-
-    const timeElement = document.getElementById("tv-live-time");
-    const dateElement = document.getElementById("tv-live-date");
-
-    if (!timeElement || !dateElement) return;
-
-    const timeFormatter = new Intl.DateTimeFormat("en-IN", {
-        timeZone: "Asia/Kolkata",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true
-    });
-
-    const dateFormatter = new Intl.DateTimeFormat("en-IN", {
-        timeZone: "Asia/Kolkata",
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
-    });
-
-    function updateLiveClock() {
-        const now = new Date();
-        timeElement.textContent = timeFormatter.format(now);
-        dateElement.textContent = dateFormatter.format(now);
-    }
-
-    updateLiveClock();
-    window.setInterval(updateLiveClock, 1000);
-})();
-</script>
 {% endblock %}
