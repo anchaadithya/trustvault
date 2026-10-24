@@ -1,7 +1,35 @@
+
 {% extends "base.html" %}
+
+{% block title %}Edit Document · TrustVault{% endblock %}
+
 {% block content %}
-<h1 class="h3">Edit “{{ doc.name }}”</h1>
-<form method="post" enctype="multipart/form-data" class="card card-body shadow-sm">{% csrf_token %}{{ form.as_p }}
-<p class="text-muted small">Replacement files are validated exactly like uploads (PDF, PNG, JPG, TXT, max 5 MB).</p>
-<div><button class="btn btn-primary">Save</button> <a class="btn btn-link" href="{% url 'document_detail' doc.pk %}">Cancel</a></div></form>
+<div class="container py-4">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h1 class="h3 mb-3">Edit "{{ doc.name }}"</h1>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <p class="text-muted small">
+                    Replacement files are validated like uploads:
+                    PDF, PNG, JPG, JPEG or TXT, maximum 5 MB.
+                </p>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        Save Changes
+                    </button>
+
+                    <a class="btn btn-link"
+                       href="/documents/{{ request.resolver_match.kwargs.pk }}/">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {% endblock %}

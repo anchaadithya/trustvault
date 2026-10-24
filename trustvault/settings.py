@@ -132,9 +132,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
+# Internationalization — India Standard Time
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
 USE_TZ = True
 
@@ -187,12 +187,45 @@ if not DEBUG:
         "https",
     )
 
-# Private document storage.
-# Never store confidential documents in staticfiles or a public media folder.
+# Private document storage
 PRIVATE_STORAGE_ROOT = os.environ.get(
     "PRIVATE_STORAGE_ROOT",
     str(BASE_DIR / "private_storage"),
 )
+
+# Filebase S3-compatible storage settings.
+# Local storage remains the default unless USE_S3_STORAGE=1.
+USE_S3_STORAGE = os.environ.get("USE_S3_STORAGE", "0") == "1"
+
+AWS_STORAGE_BUCKET_NAME = os.environ.get(
+    "AWS_STORAGE_BUCKET_NAME",
+    "trustvault-private-files",
+)
+
+AWS_S3_ENDPOINT_URL = os.environ.get(
+    "AWS_S3_ENDPOINT_URL",
+    "",
+).strip()
+
+AWS_ACCESS_KEY_ID = os.environ.get(
+    "AWS_ACCESS_KEY_ID",
+    "",
+).strip()
+
+AWS_SECRET_ACCESS_KEY = os.environ.get(
+    "AWS_SECRET_ACCESS_KEY",
+    "",
+).strip()
+
+if USE_S3_STORAGE:
+    if not AWS_S3_ENDPOINT_URL:
+        raise RuntimeError(
+            "AWS_S3_ENDPOINT_URL must be set when USE_S3_STORAGE=1."
+        )
+    if not AWS_ACCESS_KEY_ID or not AWS_SECRET_ACCESS_KEY:
+        raise RuntimeError(
+            "Filebase S3 credentials must be set when USE_S3_STORAGE=1."
+        )
 
 MAX_UPLOAD_SIZE = 5 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = MAX_UPLOAD_SIZE

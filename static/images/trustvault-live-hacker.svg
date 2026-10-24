@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+<defs>
+<radialGradient id="bg"><stop stop-color="#123c42"/><stop offset="1" stop-color="#020710"/></radialGradient>
+<linearGradient id="hood" x2="1" y2="1"><stop stop-color="#176b61"/><stop offset="1" stop-color="#07111b"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="5"/></filter></defs>
+<circle cx="200" cy="200" r="194" fill="url(#bg)" stroke="#00ffc8" stroke-width="3"/>
+<circle cx="200" cy="200" r="177" fill="none" stroke="#00ffc8" opacity=".35" stroke-dasharray="5 9"/>
+<path d="M64 345 Q67 120 200 48 Q333 120 336 345Z" fill="url(#hood)" stroke="#00ffc8" stroke-width="3"/>
+<path d="M99 184 Q200 111 301 184 L276 271 Q200 320 124 271Z" fill="#030911" stroke="#00ffc8" stroke-width="2"/>
+<path d="M117 197 L180 188 L173 220 L125 220Z M220 188 L283 197 L275 220 L227 220Z" fill="#00ffc8" opacity=".25" filter="url(#glow)"/>
+<path d="M117 197 L180 188 L173 220 L125 220Z M220 188 L283 197 L275 220 L227 220Z" fill="#00ffc8"/>
+<path d="M180 204 L220 204" stroke="#00ffc8" stroke-width="5"/>
+<path d="M144 253 Q200 272 256 253" fill="none" stroke="#087c72" stroke-width="3"/>
+<text x="200" y="365" text-anchor="middle" font-family="monospace" font-size="16" fill="#00ffc8">UNKNOWN // ONLINE</text>
+</svg>

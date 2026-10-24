@@ -1,27 +1,42 @@
-
+```gitignore
+# Python virtual environments
 .venv/
 venv/
 env/
+
+# Python cache
 __pycache__/
 *.py[cod]
-*.sqlite3
-db.sqlite3
+*.pyc
 
+# Environment secrets
 .env
 .env.*
 !.env.example
 
+# Database files
+*.sqlite3
+db.sqlite3
+
+# Django generated files
 staticfiles/
 media/
 uploads/
 
+# Private document storage
+private_storage/
+private_storage_backup/
+
+# Test and coverage files
 .pytest_cache/
 .coverage
+
+# Editor and operating system files
+.vscode/
 .DS_Store
-__pycache__/
-*.pyc
-db.sqlite3
-.env
-.venv/
-private_storage/
-staticfiles/
+
+# Backup files
+*.bak
+
+# Local migration helper (do not commit)
+migrate_to_filebase.py

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+<defs><radialGradient id="b"><stop stop-color="#103c4b"/><stop offset="1" stop-color="#020610"/></radialGradient><filter id="g"><feGaussianBlur stdDeviation="5"/></filter></defs>
+<circle cx="200" cy="200" r="194" fill="url(#b)" stroke="#00d9ff" stroke-width="3"/>
+<circle cx="200" cy="200" r="168" fill="none" stroke="#00d9ff" stroke-dasharray="7 10" opacity=".65"/>
+<path d="M200 58 L315 104 L301 236 Q268 307 200 344 Q132 307 99 236 L85 104Z" fill="#061421" stroke="#00d9ff" stroke-width="5"/>
+<path d="M200 82 L290 119 L278 228 Q250 278 200 309 Q150 278 122 228 L110 119Z" fill="#0b2937" stroke="#00ffc8" stroke-width="2"/>
+<path d="M148 174 L181 150 L200 172 L219 150 L252 174 L238 216 L200 238 L162 216Z" fill="#00d9ff" opacity=".2" filter="url(#g)"/>
+<path d="M148 174 L181 150 L200 172 L219 150 L252 174 L238 216 L200 238 L162 216Z" fill="none" stroke="#00ffc8" stroke-width="5"/>
+<circle cx="200" cy="193" r="12" fill="#00ffc8"/>
+<text x="200" y="267" text-anchor="middle" font-family="monospace" font-weight="bold" font-size="23" fill="#00d9ff">TRUSTVAULT</text>
+<text x="200" y="291" text-anchor="middle" font-family="monospace" font-size="12" fill="#00ffc8">SECURE // VERIFIED</text>
+</svg>

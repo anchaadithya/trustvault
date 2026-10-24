@@ -1,24 +1,49 @@
+
 import os
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 
 
-class PrivateStorage(FileSystemStorage):
-    """Files live outside static/media. base_url is None, so .url() always raises:
-    there is no way to build a public link to a stored document."""
+if getattr(settings, "USE_S3_STORAGE", False):
+    from storages.backends.s3 import S3Storage
 
-    def __init__(self):
-        super().__init__(file_permissions_mode=0o600, directory_permissions_mode=0o700)
+    class PrivateStorage(S3Storage):
+        """Private S3-compatible storage for TrustVault documents."""
 
-    @property
-    def base_location(self):
-        return settings.PRIVATE_STORAGE_ROOT  # read at use-time so tests can override it
+        def __init__(self, **kwargs):
+            super().__init__(
+                bucket_name=settings.AWS_STORAGE_BUCKET_NAME,
+                endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+                region_name="auto",
+                access_key=settings.AWS_ACCESS_KEY_ID,
+                secret_key=settings.AWS_SECRET_ACCESS_KEY,
+                default_acl=None,
+                querystring_auth=True,
+                file_overwrite=False,
+                custom_domain=None,
+                addressing_style="path",
+                **kwargs,
+            )
 
-    @property
-    def location(self):
-        return os.path.abspath(self.base_location)
+else:
+    class PrivateStorage(FileSystemStorage):
+        """Private local storage for development."""
 
-    @property
-    def base_url(self):
-        return None
+        def __init__(self):
+            super().__init__(
+                file_permissions_mode=0o600,
+                directory_permissions_mode=0o700,
+            )
+
+        @property
+        def base_location(self):
+            return settings.PRIVATE_STORAGE_ROOT
+
+        @property
+        def location(self):
+            return os.path.abspath(self.base_location)
+
+        @property
+        def base_url(self):
+            return None
