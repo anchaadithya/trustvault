@@ -1,4 +1,5 @@
 
+import logging
 from datetime import timedelta
 
 from django.contrib import messages
@@ -18,6 +19,7 @@ from .forms import UploadForm, EditForm, GrantForm, FilterForm
 from .models import Document, DocumentPermission, DownloadAccessRequest
 
 
+logger = logging.getLogger(__name__)
 APPROVAL_DURATION = timedelta(hours=1)
 
 
@@ -30,25 +32,23 @@ def _is_owner(user, document):
 
 
 def _approved_download(user, document):
-    now = timezone.now()
     return DownloadAccessRequest.objects.filter(
         document=document,
         requester=user,
         request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
         status=DownloadAccessRequest.STATUS_APPROVED,
         downloaded_at__isnull=True,
-        approval_expires_at__gt=now,
+        approval_expires_at__gt=timezone.now(),
     ).exists()
 
 
 def _approved_view(user, document):
-    now = timezone.now()
     return DownloadAccessRequest.objects.filter(
         document=document,
         requester=user,
         request_type=DownloadAccessRequest.TYPE_READ,
         status=DownloadAccessRequest.STATUS_APPROVED,
-        approval_expires_at__gt=now,
+        approval_expires_at__gt=timezone.now(),
     ).exists()
 
 
@@ -59,26 +59,30 @@ def document_list(request):
 
     if form.is_valid():
         data = form.cleaned_data
+
         if data.get("q"):
             documents = documents.filter(name__icontains=data["q"])
+
         if data.get("owner"):
             documents = documents.filter(
                 owner__username__icontains=data["owner"]
             )
+
         if data.get("category"):
             documents = documents.filter(
                 category__icontains=data["category"]
             )
+
         if data.get("date_from"):
             documents = documents.filter(
                 uploaded_at__date__gte=data["date_from"]
             )
+
         if data.get("date_to"):
             documents = documents.filter(
                 uploaded_at__date__lte=data["date_to"]
             )
 
-    # Listing shows document names; opening details is separately protected.
     return render(
         request,
         "documents/document_list.html",
@@ -105,14 +109,21 @@ def upload(request):
             content_type=meta["content_type"][:50],
             size=uploaded_file.size,
         )
-        document.file.save("upload" + meta["ext"], uploaded_file, save=True)
+
+        document.file.save(
+            "upload" + meta["ext"],
+            uploaded_file,
+            save=True,
+        )
 
         record(
             request,
             AuditAction.UPLOAD,
             Outcome.SUCCESS,
+            document=document,
             detail=f"uploaded document {document.pk}",
         )
+
         messages.success(request, "Document uploaded successfully.")
         return redirect("document_detail", pk=document.pk)
 
@@ -132,11 +143,15 @@ def request_download_access(request, pk):
         raise PermissionDenied
 
     with transaction.atomic():
-        access_request = DownloadAccessRequest.objects.select_for_update().filter(
-            document=document,
-            requester=request.user,
-            request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
-        ).first()
+        access_request = (
+            DownloadAccessRequest.objects.select_for_update()
+            .filter(
+                document=document,
+                requester=request.user,
+                request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
+            )
+            .first()
+        )
 
         now = timezone.now()
 
@@ -147,10 +162,14 @@ def request_download_access(request, pk):
                 request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
                 status=DownloadAccessRequest.STATUS_PENDING,
             )
-            messages.success(request, "Download request sent to the owner.")
+            messages.success(
+                request, "Download request sent to the owner."
+            )
 
         elif access_request.status == DownloadAccessRequest.STATUS_PENDING:
-            messages.info(request, "Your download request is already pending.")
+            messages.info(
+                request, "Your download request is already pending."
+            )
 
         elif (
             access_request.status == DownloadAccessRequest.STATUS_APPROVED
@@ -158,7 +177,9 @@ def request_download_access(request, pk):
             and access_request.approval_expires_at
             and access_request.approval_expires_at > now
         ):
-            messages.info(request, "Your download approval is still active.")
+            messages.info(
+                request, "Your download approval is still active."
+            )
 
         else:
             access_request.status = DownloadAccessRequest.STATUS_PENDING
@@ -167,11 +188,19 @@ def request_download_access(request, pk):
             access_request.reviewed_by = None
             access_request.approval_expires_at = None
             access_request.downloaded_at = None
-            access_request.save(update_fields=[
-                "status", "requested_at", "reviewed_at", "reviewed_by",
-                "approval_expires_at", "downloaded_at",
-            ])
-            messages.success(request, "New download request sent to the owner.")
+            access_request.save(
+                update_fields=[
+                    "status",
+                    "requested_at",
+                    "reviewed_at",
+                    "reviewed_by",
+                    "approval_expires_at",
+                    "downloaded_at",
+                ]
+            )
+            messages.success(
+                request, "New download request sent to the owner."
+            )
 
     return redirect("document_detail", pk=pk)
 
@@ -186,11 +215,15 @@ def request_view_access(request, pk):
         return redirect("document_detail", pk=pk)
 
     with transaction.atomic():
-        access_request = DownloadAccessRequest.objects.select_for_update().filter(
-            document=document,
-            requester=request.user,
-            request_type=DownloadAccessRequest.TYPE_READ,
-        ).first()
+        access_request = (
+            DownloadAccessRequest.objects.select_for_update()
+            .filter(
+                document=document,
+                requester=request.user,
+                request_type=DownloadAccessRequest.TYPE_READ,
+            )
+            .first()
+        )
 
         now = timezone.now()
 
@@ -201,7 +234,9 @@ def request_view_access(request, pk):
                 request_type=DownloadAccessRequest.TYPE_READ,
                 status=DownloadAccessRequest.STATUS_PENDING,
             )
-            messages.success(request, "View access request sent to the owner.")
+            messages.success(
+                request, "View access request sent to the owner."
+            )
 
         elif (
             access_request.status == DownloadAccessRequest.STATUS_APPROVED
@@ -220,11 +255,19 @@ def request_view_access(request, pk):
             access_request.reviewed_by = None
             access_request.approval_expires_at = None
             access_request.downloaded_at = None
-            access_request.save(update_fields=[
-                "status", "requested_at", "reviewed_at", "reviewed_by",
-                "approval_expires_at", "downloaded_at",
-            ])
-            messages.success(request, "New view request sent to the owner.")
+            access_request.save(
+                update_fields=[
+                    "status",
+                    "requested_at",
+                    "reviewed_at",
+                    "reviewed_by",
+                    "approval_expires_at",
+                    "downloaded_at",
+                ]
+            )
+            messages.success(
+                request, "New view request sent to the owner."
+            )
 
     return redirect("document_detail", pk=pk)
 
@@ -235,9 +278,7 @@ def download_requests(request):
         raise PermissionDenied
 
     requests_list = (
-        DownloadAccessRequest.objects.filter(
-            document__owner=request.user,
-        )
+        DownloadAccessRequest.objects.filter(document__owner=request.user)
         .select_related("document", "requester")
         .order_by("-requested_at")
     )
@@ -271,7 +312,9 @@ def review_download_request(request, request_pk, decision):
         )
 
         if access_request.status != DownloadAccessRequest.STATUS_PENDING:
-            messages.info(request, "This request has already been reviewed.")
+            messages.info(
+                request, "This request has already been reviewed."
+            )
             return redirect("download_requests")
 
         now = timezone.now()
@@ -281,18 +324,27 @@ def review_download_request(request, request_pk, decision):
         if decision == "approve":
             access_request.status = DownloadAccessRequest.STATUS_APPROVED
             access_request.approval_expires_at = now + APPROVAL_DURATION
+
             if access_request.request_type == DownloadAccessRequest.TYPE_DOWNLOAD:
                 access_request.downloaded_at = None
         else:
             access_request.status = DownloadAccessRequest.STATUS_REJECTED
             access_request.approval_expires_at = None
 
-        access_request.save(update_fields=[
-            "status", "reviewed_at", "reviewed_by",
-            "approval_expires_at", "downloaded_at",
-        ])
+        access_request.save(
+            update_fields=[
+                "status",
+                "reviewed_at",
+                "reviewed_by",
+                "approval_expires_at",
+                "downloaded_at",
+            ]
+        )
 
-    messages.success(request, f"{access_request.get_request_type_display()} request {decision}d.")
+    messages.success(
+        request,
+        f"{access_request.get_request_type_display()} request {decision}d.",
+    )
     return redirect("download_requests")
 
 
@@ -304,6 +356,7 @@ def detail(request, pk):
     )
 
     own_document = document.owner_id == request.user.pk
+
     view_request = DownloadAccessRequest.objects.filter(
         document=document,
         requester=request.user,
@@ -318,7 +371,6 @@ def detail(request, pk):
 
     can_view = own_document or _approved_view(request.user, document)
 
-    # Do not reveal document metadata to users without view permission.
     if not can_view:
         return render(
             request,
@@ -362,38 +414,59 @@ def download(request, pk):
 
     if not own_document:
         with transaction.atomic():
-            access_request = DownloadAccessRequest.objects.select_for_update().filter(
-                document=document,
-                requester=request.user,
-                request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
-                status=DownloadAccessRequest.STATUS_APPROVED,
-                downloaded_at__isnull=True,
-                approval_expires_at__gt=timezone.now(),
-            ).first()
+            access_request = (
+                DownloadAccessRequest.objects.select_for_update()
+                .filter(
+                    document=document,
+                    requester=request.user,
+                    request_type=DownloadAccessRequest.TYPE_DOWNLOAD,
+                    status=DownloadAccessRequest.STATUS_APPROVED,
+                    downloaded_at__isnull=True,
+                    approval_expires_at__gt=timezone.now(),
+                )
+                .first()
+            )
 
             if access_request is None:
                 record(
-                    request, AuditAction.DOWNLOAD, Outcome.FAILURE,
+                    request,
+                    AuditAction.DOWNLOAD,
+                    Outcome.FAILURE,
+                    document=document,
                     detail=f"blocked unauthorized download of document {document.pk}",
                 )
-                messages.error(request, "Download denied. Request owner approval.")
+                messages.error(
+                    request, "Download denied. Request owner approval."
+                )
                 return redirect("document_detail", pk=pk)
 
             try:
                 file_handle = document.file.open("rb")
             except (FileNotFoundError, OSError, ValueError):
+                logger.exception(
+                    "TrustVault download failed for document ID %s",
+                    document.pk,
+                )
                 raise Http404("Document file is unavailable.")
 
             access_request.downloaded_at = timezone.now()
             access_request.save(update_fields=["downloaded_at"])
+
     else:
         try:
             file_handle = document.file.open("rb")
         except (FileNotFoundError, OSError, ValueError):
+            logger.exception(
+                "TrustVault download failed for document ID %s",
+                document.pk,
+            )
             raise Http404("Document file is unavailable.")
 
     record(
-        request, AuditAction.DOWNLOAD, Outcome.SUCCESS,
+        request,
+        AuditAction.DOWNLOAD,
+        Outcome.SUCCESS,
+        document=document,
         detail=f"downloaded document {document.pk}",
     )
 
@@ -415,24 +488,34 @@ def edit(request, pk):
     if not _is_owner(request.user, document):
         raise PermissionDenied
 
-    form = EditForm(request.POST or None, request.FILES or None, instance=document)
+    form = EditForm(
+        request.POST or None,
+        request.FILES or None,
+        instance=document,
+    )
 
     if request.method == "POST" and form.is_valid():
         with transaction.atomic():
             updated = form.save(commit=False)
             new_file = form.cleaned_data.get("new_file")
+
             if new_file:
                 meta = form.meta
                 updated.original_filename = meta["display"][:100]
                 updated.content_type = meta["content_type"][:50]
                 updated.size = new_file.size
                 updated.file = new_file
+
             updated.save()
 
         messages.success(request, "Document updated successfully.")
         return redirect("document_detail", pk=pk)
 
-    return render(request, "documents/edit.html", {"form": form, "document": document})
+    return render(
+        request,
+        "documents/edit.html",
+        {"form": form, "document": document},
+    )
 
 
 @login_required
@@ -466,6 +549,7 @@ def permissions(request, pk):
                 "granted_by": request.user,
             },
         )
+
         messages.success(request, "Permission granted.")
         return redirect("document_permissions", pk=pk)
 
@@ -493,6 +577,7 @@ def revoke(request, pk, perm_pk):
         pk=perm_pk,
         document=document,
     )
+
     permission.delete()
     messages.success(request, "Permission revoked.")
     return redirect("document_permissions", pk=pk)
